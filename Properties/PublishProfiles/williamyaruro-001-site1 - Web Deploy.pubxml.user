@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+This file is used by the publish/package process of your Web project. You can customize the behavior of this process
+by editing this MSBuild file. In order to learn more about this please visit https://go.microsoft.com/fwlink/?LinkID=208121. 
+-->
+<Project>
+  <PropertyGroup>
+    <TimeStampOfAssociatedLegacyPublishXmlFile />
+    <EncryptedPassword />
+    <History>True|2024-11-28T15:13:22.9972645Z||;False|2024-11-28T10:13:09.3431211-05:00||;True|2024-11-28T10:03:44.6365916-05:00||;True|2024-11-28T10:00:29.0116836-05:00||;</History>
+    <LastFailureDetails />
+  </PropertyGroup>
+  <ItemGroup>
+    <DestinationConnectionStrings Include="Conexion">
+      <Value>data source=sql.hmdevs.com%3b initial catalog=VacunasBD%3b user id=williamyaruro%3b password=Yaruro123%2a%3b TrustServerCertificate=True</Value>
+    </DestinationConnectionStrings>
+  </ItemGroup>
+</Project>
