@@ -6,6 +6,8 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
+using System.Text.Json;
+using System.Text.Json.Serialization;
 
 namespace API.Controllers;
 
@@ -46,8 +48,17 @@ public class UsuarioController : ControllerBase
     {
         try
         {
-            var listUsuarios = await _usuarioService.GetListUsuarios();
-            return Ok(listUsuarios);
+            var usuarios = await _usuarioService.GetListUsuarios();
+            
+            // Crear una nueva lista sin el campo password
+            var usuariosSinPassword = usuarios.Select(u => new
+            {
+                u.Id,
+                u.NombreUsuario,
+                u.RolUser
+            });
+            
+            return Ok(usuariosSinPassword);
         }
         catch (Exception ex)
         {
@@ -56,13 +67,24 @@ public class UsuarioController : ControllerBase
     }
 
     [HttpGet("{id}")]
-   // [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
+    // [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
     public async Task<IActionResult> Get(int id)
     {
         try
         {
             var usuario = await _usuarioService.GetUsuario(id);
-            return Ok(usuario);
+            if (usuario == null)
+                return NotFound(new { message = "Usuario no encontrado" });
+                
+            // Crear un objeto anónimo sin el campo password
+            var usuarioSinPassword = new
+            {
+                usuario.Id,
+                usuario.NombreUsuario,
+                usuario.RolUser
+            };
+            
+            return Ok(usuarioSinPassword);
         }
         catch (Exception e)
         {
@@ -70,81 +92,37 @@ public class UsuarioController : ControllerBase
         }
     }
 
-    // localhost:xxxx/api/Usuario/CambiarPassword
-    [Route("CambiarPassword")]
-    [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
-    [HttpPut]
-    public async Task<IActionResult> CambiarPassword([FromBody] CambiarPasswordDTO cambiarPassword)
-    {
-        try
-        {
-            var identity = HttpContext.User.Identity as ClaimsIdentity;
-
-            int idUsuario = JwtConfigurator.GetTokenIdUsuario(identity);
-            string passwordEncriptado = Encriptar.EncriptarPassword(cambiarPassword.passwordAnterior);
-            var usuario = await _usuarioService.ValidatePassword(idUsuario, passwordEncriptado);
-            if (usuario == null)
-            {
-                return BadRequest(new { message = "La password es incorrecta" });
-            }
-            else
-            {
-                usuario.Password = Encriptar.EncriptarPassword(cambiarPassword.nuevaPassword);
-                await _usuarioService.UpdatePassword(usuario);
-                return Ok(new { message = "La password fue actualizada con exito" });
-            }
-
-
-        }
-        catch (Exception ex)
-        {
-            return BadRequest(ex.Message);
-        }
-    }
-    
-    // Nuevo endpoint para cambiar contraseña por ID de usuario
-    [Route("CambiarPasswordPorId/{id}")]
-    [HttpPut]
-    public async Task<IActionResult> CambiarPasswordPorId(int id, [FromBody] CambiarPasswordDTO cambiarPassword)
-    {
-        try
-        {
-            // Validar que el usuario existe
-            var usuario = await _usuarioService.GetUsuario(id);
-            if (usuario == null)
-            {
-                return NotFound(new { message = "El usuario no existe" });
-            }
-            
-            // Validar contraseña anterior
-            string passwordEncriptado = Encriptar.EncriptarPassword(cambiarPassword.passwordAnterior);
-            var usuarioValidado = await _usuarioService.ValidatePassword(id, passwordEncriptado);
-            if (usuarioValidado == null)
-            {
-                return BadRequest(new { message = "La contraseña anterior es incorrecta" });
-            }
-            
-            // Actualizar contraseña
-            string nuevaPasswordEncriptada = Encriptar.EncriptarPassword(cambiarPassword.nuevaPassword);
-            await _usuarioService.UpdatePasswordById(id, nuevaPasswordEncriptada);
-            
-            return Ok(new { message = "La contraseña fue actualizada con éxito" });
-        }
-        catch (Exception ex)
-        {
-            return BadRequest(ex.Message);
-        }
-    }
-
     [HttpPut("{id}")]
-    public async Task<IActionResult> CambiarRol(long id, Usuario item)
+    public async Task<IActionResult> ActualizarUsuario(int id, [FromBody] ActualizarUsuarioDTO actualizarUsuarioDTO)
     {
-        if (id != item.Id)
+        try
         {
-            return BadRequest(new { message = "Usuario no encontrado" });
+            // Verificar que el usuario existe
+            var usuarioExistente = await _usuarioService.GetUsuario(id);
+            if (usuarioExistente == null)
+                return NotFound(new { message = "Usuario no encontrado" });
+            
+            // Actualizar el usuario con los campos proporcionados
+            var usuarioActualizado = await _usuarioService.UpdateUsuarioAsync(id, actualizarUsuarioDTO);
+            
+            // Devolver respuesta sin incluir el campo password
+            var respuesta = new
+            {
+                message = "Usuario actualizado con éxito",
+                usuario = new
+                {
+                    usuarioActualizado.Id,
+                    usuarioActualizado.NombreUsuario,
+                    usuarioActualizado.RolUser
+                }
+            };
+            
+            return Ok(respuesta);
         }
-        await _usuarioService.UpdateRol(item);
-        return Ok(new { message = "El nuevo rol fue asignado correctamente" });
+        catch (Exception ex)
+        {
+            return BadRequest(ex.Message);
+        }
     }
     
     // Nuevo endpoint para eliminar usuario por ID

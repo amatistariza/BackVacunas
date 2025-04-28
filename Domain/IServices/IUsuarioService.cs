@@ -1,4 +1,5 @@
 ﻿using API.Domain.Models;
+using API.DTO;
 
 namespace API.Domain.IServices;
 
@@ -13,4 +14,5 @@ public interface IUsuarioService
     Task UpdateRol(Usuario usuario);
     Task DeleteAsync(int id);
     Task UpdatePasswordById(int id, string newPassword);
+    Task<Usuario> UpdateUsuarioAsync(int id, ActualizarUsuarioDTO actualizarUsuarioDTO);
 }

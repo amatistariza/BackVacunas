@@ -63,4 +63,11 @@ public class UsuarioRepository : IUsuarioRepository
             await _context.SaveChangesAsync();
         }
     }
+
+    public async Task<Usuario> UpdateUsuarioAsync(Usuario usuario)
+    {
+        _context.Update(usuario);
+        await _context.SaveChangesAsync();
+        return usuario;
+    }
 }

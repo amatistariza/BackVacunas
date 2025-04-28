@@ -1,6 +1,8 @@
 ﻿using API.Domain.IRepositories;
 using API.Domain.IServices;
 using API.Domain.Models;
+using API.DTO;
+using API.Utils;
 
 namespace API.Services;
 
@@ -60,5 +62,25 @@ public class UsuarioService : IUsuarioService
             usuario.Password = newPassword;
             await _usuarioRepository.UpdatePassword(usuario);
         }
+    }
+
+    public async Task<Usuario> UpdateUsuarioAsync(int id, ActualizarUsuarioDTO actualizarUsuarioDTO)
+    {
+        var usuario = await _usuarioRepository.GetUsuario(id);
+        if (usuario == null)
+            return null;
+        
+        // Actualizar solo los campos proporcionados
+        if (!string.IsNullOrEmpty(actualizarUsuarioDTO.NombreUsuario))
+        {
+            usuario.NombreUsuario = actualizarUsuarioDTO.NombreUsuario;
+        }
+        
+        if (!string.IsNullOrEmpty(actualizarUsuarioDTO.Password))
+        {
+            usuario.Password = Encriptar.EncriptarPassword(actualizarUsuarioDTO.Password);
+        }
+        
+        return await _usuarioRepository.UpdateUsuarioAsync(usuario);
     }
 }

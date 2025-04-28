@@ -1,4 +1,5 @@
 ﻿using API.Domain.Models;
+using API.DTO;
 
 namespace API.Domain.IRepositories;
 
@@ -19,4 +20,6 @@ public interface IUsuarioRepository
     Task UpdateRol(Usuario usuario);
     
     Task DeleteAsync(int id);
+    
+    Task<Usuario> UpdateUsuarioAsync(Usuario usuario);
 }
