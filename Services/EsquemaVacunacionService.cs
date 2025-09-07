@@ -70,18 +70,13 @@ public class EsquemaVacunacionService : IEsquemaVacunacionService
 
     private async Task ProcesarDetallesYGuardar(EsquemaVacunacion esquemaVacunacion)
     {
-        foreach (var detalle in esquemaVacunacion.Detalles)
+    foreach (var detalle in esquemaVacunacion.Detalles)
         {
             if (detalle.VacunaId.HasValue)
             {
                 var vac = await _vacunaRepository.GetByIdAsync(detalle.VacunaId.Value);
                 if (vac == null) throw new InvalidOperationException($"Vacuna detalle Id {detalle.VacunaId.Value} no existe.");
                 await _vacunaRepository.DescontarInventarioAsync(detalle.VacunaId.Value, detalle.CantidadUtilizadaVacuna ?? 0);
-                await _alarmaService.CrearAlarmaDesdeEsquemaAsync(
-                    esquemaVacunacion.PacienteId,
-                    detalle.VacunaId.Value,
-                    detalle.NumeroDosis,
-                    detalle.FechaAplicacion);
             }
             if (detalle.SueroId.HasValue)
             {
@@ -102,7 +97,28 @@ public class EsquemaVacunacionService : IEsquemaVacunacionService
                 await _jeringaRepository.DescontarInventarioAsync(detalle.JeringaId.Value, detalle.CantidadUtilizadaJeringa ?? 0);
             }
         }
+        // Calcular FechaProximaDosis si no es última dosis
+        var vacuna = await _vacunaRepository.GetByIdAsync(esquemaVacunacion.VacunaId);
+        if (vacuna != null && esquemaVacunacion.NumeroDeDosis < vacuna.NumeroDosis)
+        {
+            esquemaVacunacion.FechaProximaDosis = esquemaVacunacion.FechaDosisAplicada.AddDays(vacuna.IntervaloSemanas * 7);
+        }
+        else
+        {
+            esquemaVacunacion.FechaProximaDosis = null;
+        }
+
         await _esquemaRepository.AddAsync(esquemaVacunacion);
+
+        // Crear alarma sólo si hay próxima dosis
+        if (esquemaVacunacion.FechaProximaDosis.HasValue)
+        {
+            await _alarmaService.CrearAlarmaDesdeEsquemaAsync(
+                esquemaVacunacion.PacienteId,
+                esquemaVacunacion.VacunaId,
+                esquemaVacunacion.NumeroDeDosis,
+                esquemaVacunacion.FechaDosisAplicada);
+        }
     }
 
     public async Task<EsquemaVacunacion> GetEsquemaConDetallesAsync(int esquemaId)

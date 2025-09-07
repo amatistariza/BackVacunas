@@ -26,14 +26,15 @@ public class EsquemaVacunacionController : ControllerBase
                 TipoCarnet = dto.TipoCarnet,
                 Responsable = dto.Responsable,
                 RegistradoPAI = dto.RegistradoPAI,
-                MotivoNoIngreso = dto.MotivoNoIngreso,
+                MotivoIngreso = dto.MotivoIngreso,
                 Observaciones = dto.Observaciones,
                 PacienteId = dto.PacienteId,
                 VacunaId = dto.VacunaId,
-                CantidadTotalDosis = dto.CantidadTotalDosis,
-                FrecuenciaAplicacion = dto.FrecuenciaAplicacion,
-                DiasIntervalo = dto.DiasIntervalo,
-                FechaPrimeraDosis = dto.FechaPrimeraDosis,
+                NumeroDeDosis = dto.NumeroDeDosis,
+                FechaDosisAplicada = dto.FechaDosisAplicada,
+                ViaDeAdministracion = dto.ViaDeAdministracion,
+                SitioDeAplicacion = dto.SitioDeAplicacion,
+                Lote = dto.Lote,
                 Detalles = dto.Detalles.Select(d => new EsquemaVacunacionDetalle
                 {
                     VacunaId = d.VacunaId,
@@ -43,9 +44,7 @@ public class EsquemaVacunacionController : ControllerBase
                     DiluyenteId = d.DiluyenteId,
                     CantidadUtilizadaDiluyente = d.CantidadUtilizadaDiluyente,
                     JeringaId = d.JeringaId,
-                    CantidadUtilizadaJeringa = d.CantidadUtilizadaJeringa,
-                    FechaAplicacion = d.FechaAplicacion,
-                    NumeroDosis = d.NumeroDosis
+                    CantidadUtilizadaJeringa = d.CantidadUtilizadaJeringa
                 }).ToList()
             };
 
@@ -79,7 +78,7 @@ public class EsquemaVacunacionController : ControllerBase
                 esquema.TipoCarnet,
                 esquema.Responsable,
                 esquema.RegistradoPAI,
-                esquema.MotivoNoIngreso,
+                esquema.MotivoIngreso,
                 esquema.Observaciones,
                 esquema.PacienteId,
                 Paciente = paciente != null ? new {
@@ -97,15 +96,15 @@ public class EsquemaVacunacionController : ControllerBase
                     vacuna.NumeroDosis,
                     vacuna.IntervaloSemanas
                 } : null,
-                esquema.CantidadTotalDosis,
-                esquema.FrecuenciaAplicacion,
-                esquema.DiasIntervalo,
-                esquema.FechaPrimeraDosis,
+                esquema.NumeroDeDosis,
+                esquema.FechaDosisAplicada,
+                esquema.FechaProximaDosis,
+                esquema.ViaDeAdministracion,
+                esquema.SitioDeAplicacion,
+                esquema.Lote,
                 Detalles = esquema.Detalles.Select(d => new {
                     d.Id,
                     d.VacunaId,
-                    d.NumeroDosis,
-                    d.FechaAplicacion,
                     d.CantidadUtilizadaVacuna,
                     d.SueroId,
                     d.DiluyenteId,

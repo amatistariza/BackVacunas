@@ -196,6 +196,7 @@ public static class DatabaseSeeder
         if (!ctx.EsquemasVacunacion.Any())
         {
             var vacunaPenta = ctx.Vacunas.First(v => v.Nombre == "Pentavalente");
+            var fechaAplicacion = DateTime.UtcNow.AddDays(-14);
             var esquema = new EsquemaVacunacion
             {
                 TipoCarnet = "INFANTIL",
@@ -203,23 +204,19 @@ public static class DatabaseSeeder
                 RegistradoPAI = true,
                 PacienteId = paciente1.Id,
                 VacunaId = vacunaPenta.Id,
-                CantidadTotalDosis = 3,
-                FrecuenciaAplicacion = "semanal",
-                FechaPrimeraDosis = DateTime.UtcNow
+                NumeroDeDosis = 1,
+                FechaDosisAplicada = fechaAplicacion,
+                FechaProximaDosis = fechaAplicacion.AddDays(vacunaPenta.IntervaloSemanas * 7),
+                ViaDeAdministracion = "IM",
+                SitioDeAplicacion = "Muslo",
+                Lote = vacunaPenta.Lote,
+                Detalles = new List<EsquemaVacunacionDetalle>{ new EsquemaVacunacionDetalle {
+                    VacunaId = vacunaPenta.Id,
+                    CantidadUtilizadaVacuna = 1,
+                    JeringaId = ctx.Jeringas.OrderBy(j=>j.Id).First().Id
+                }}
             };
             ctx.EsquemasVacunacion.Add(esquema);
-            await ctx.SaveChangesAsync();
-
-            var detalle = new EsquemaVacunacionDetalle
-            {
-                EsquemaVacunacionId = esquema.Id,
-                VacunaId = vacunaPenta.Id,
-                CantidadUtilizadaVacuna = 1,
-                FechaAplicacion = DateTime.UtcNow,
-                NumeroDosis = 1,
-                JeringaId = ctx.Jeringas.OrderBy(j=>j.Id).First().Id
-            };
-            ctx.EsquemaVacunacionDetalles.Add(detalle);
             await ctx.SaveChangesAsync();
 
             ctx.AlarmasVacunacion.Add(new AlarmaVacunacion
@@ -227,32 +224,17 @@ public static class DatabaseSeeder
                 PacienteId = paciente1.Id,
                 VacunaId = vacunaPenta.Id,
                 DosisActual = 1,
-                FechaPrimeraAplicacion = detalle.FechaAplicacion,
-                FechaUltimaAplicacion = detalle.FechaAplicacion,
-                FechaProximaAplicacion = detalle.FechaAplicacion.AddDays(vacunaPenta.IntervaloSemanas * 7),
-                Observaciones = "Proxima dosis Pentavalente",
-                EsquemaVacunacionDetalleId = detalle.Id
-            });
-            await ctx.SaveChangesAsync();
-
-            ctx.RegistrosVacunacion.Add(new RegistroVacunacion
-            {
-                PacienteId = paciente1.Id,
-                VacunaId = vacunaPenta.Id,
-                EsquemaVacunacionId = esquema.Id,
-                NumeroDosis = 1,
-                FechaAplicacion = detalle.FechaAplicacion,
-                FechaProximaDosis = detalle.FechaAplicacion.AddDays(vacunaPenta.IntervaloSemanas * 7),
-                FechaRegistro = DateTime.UtcNow,
-                EstadoRegistro = "Aplicada",
-                Observaciones = "Primera dosis aplicada",
-                UsuarioRegistro = "admin"
+                FechaPrimeraAplicacion = fechaAplicacion,
+                FechaUltimaAplicacion = fechaAplicacion,
+                FechaProximaAplicacion = esquema.FechaProximaDosis ?? fechaAplicacion,
+                Observaciones = "Proxima dosis Pentavalente"
             });
             await ctx.SaveChangesAsync();
 
             if (paciente2 != null)
             {
                 var vacunaNeumo = ctx.Vacunas.First(v => v.Nombre == "Neumococo");
+                var fechaAplicacion2 = DateTime.UtcNow.AddDays(-10);
                 ctx.EsquemasVacunacion.Add(new EsquemaVacunacion
                 {
                     TipoCarnet = "INFANTIL",
@@ -260,9 +242,17 @@ public static class DatabaseSeeder
                     RegistradoPAI = true,
                     PacienteId = paciente2.Id,
                     VacunaId = vacunaNeumo.Id,
-                    CantidadTotalDosis = 3,
-                    FrecuenciaAplicacion = "semanal",
-                    FechaPrimeraDosis = DateTime.UtcNow
+                    NumeroDeDosis = 1,
+                    FechaDosisAplicada = fechaAplicacion2,
+                    FechaProximaDosis = fechaAplicacion2.AddDays(vacunaNeumo.IntervaloSemanas * 7),
+                    ViaDeAdministracion = "IM",
+                    SitioDeAplicacion = "Brazo",
+                    Lote = vacunaNeumo.Lote,
+                    Detalles = new List<EsquemaVacunacionDetalle>{ new EsquemaVacunacionDetalle {
+                        VacunaId = vacunaNeumo.Id,
+                        CantidadUtilizadaVacuna = 1,
+                        JeringaId = ctx.Jeringas.OrderBy(j=>j.Id).First().Id
+                    }}
                 });
                 await ctx.SaveChangesAsync();
             }

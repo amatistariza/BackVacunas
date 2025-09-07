@@ -4,26 +4,20 @@ namespace API.DTO;
 
 public class EsquemaVacunacionCreateDTO
 {
-    [Required]
-    public string TipoCarnet { get; set; } = null!;
-    [Required]
-    public string Responsable { get; set; } = null!;
-    [Required]
-    public bool RegistradoPAI { get; set; }
-    public string? MotivoNoIngreso { get; set; }
-    public string? Observaciones { get; set; }
-    [Required]
-    public int PacienteId { get; set; }
-    [Required]
-    public int VacunaId { get; set; }
-    [Required]
-    public int CantidadTotalDosis { get; set; }
-    [Required]
-    public string FrecuenciaAplicacion { get; set; } = null!;
-    public int? DiasIntervalo { get; set; }
-    public DateTime FechaPrimeraDosis { get; set; }
-    [Required]
-    public List<EsquemaVacunacionDetalleCreateDTO> Detalles { get; set; } = new();
+    [Required] public string TipoCarnet { get; set; }
+    [Required] public string Responsable { get; set; }
+    [Required] public bool RegistradoPAI { get; set; }
+    public string MotivoIngreso { get; set; }
+    public string Observaciones { get; set; }
+    [Required] public int PacienteId { get; set; }
+    [Required] public int VacunaId { get; set; }
+    [Required] public int NumeroDeDosis { get; set; }
+    [Required] public DateTime FechaDosisAplicada { get; set; }
+    public string ViaDeAdministracion { get; set; }
+    public string SitioDeAplicacion { get; set; }
+    public string Lote { get; set; }
+    // Insumos consumidos
+    [Required] public List<EsquemaVacunacionDetalleCreateDTO> Detalles { get; set; } = new();
 }
 
 public class EsquemaVacunacionDetalleCreateDTO
@@ -36,6 +30,4 @@ public class EsquemaVacunacionDetalleCreateDTO
     public int? CantidadUtilizadaDiluyente { get; set; }
     public int? JeringaId { get; set; }
     public int? CantidadUtilizadaJeringa { get; set; }
-    public DateTime FechaAplicacion { get; set; }
-    public int NumeroDosis { get; set; } = 1;
 }

@@ -8,46 +8,51 @@ namespace API.Domain.Models;
 public class EsquemaVacunacion
 {
   [Key]
-  public int Id { get; set; } // Identificador único del esquema
+  public int Id { get; set; }
+
+  [Required, StringLength(50)]
+  public string TipoCarnet { get; set; }
+
+  [Required, StringLength(100)]
+  public string Responsable { get; set; }
 
   [Required]
-  [StringLength(50)]
-  public string TipoCarnet { get; set; } // Tipo de carnet
+  public bool RegistradoPAI { get; set; }
+
+  [StringLength(500)]
+  public string MotivoIngreso { get; set; }
+
+  [StringLength(500)]
+  public string Observaciones { get; set; }
 
   [Required]
+  public int PacienteId { get; set; }
+
+  [Required]
+  public int VacunaId { get; set; }
+
+  // Dosis aplicada actualmente (1,2,3...)
+  [Required]
+  public int NumeroDeDosis { get; set; }
+
+  // Fecha en que se aplicó esta dosis
+  [Required]
+  public DateTime FechaDosisAplicada { get; set; }
+
+  // Calculada: próxima fecha sugerida (puede ser null si última dosis)
+  public DateTime? FechaProximaDosis { get; set; }
+
+  // Datos de administración
   [StringLength(100)]
-  public string Responsable { get; set; } // Responsable del esquema (vacunador)
+  public string ViaDeAdministracion { get; set; }
+  [StringLength(100)]
+  public string SitioDeAplicacion { get; set; }
+  [StringLength(100)]
+  public string Lote { get; set; }
 
-  [Required]
-  public bool RegistradoPAI { get; set; } // Indica si fue registrado en el PAI
+  // Relación con detalles (insumos consumidos)
+  public ICollection<EsquemaVacunacionDetalle> Detalles { get; set; }
 
-  [StringLength(500)]
-  public string? MotivoNoIngreso { get; set; } // Motivo de no ingreso (opcional)
-
-  [StringLength(500)]
-  public string? Observaciones { get; set; } // Observaciones adicionales (opcional)
-
-  [Required]
-  public int PacienteId { get; set; } // Identificador del paciente asociado
-
-  [Required]
-  public int VacunaId { get; set; } // Identificador de la vacuna
-
-  [Required]
-  public int CantidadTotalDosis { get; set; } // Total de dosis requeridas (ej: 5)
-
-  [Required]
-  [StringLength(50)]
-  public string FrecuenciaAplicacion { get; set; } // semanal, mensual, dias
-
-  public int? DiasIntervalo { get; set; } // Días entre dosis (cuando frecuencia es "dias")
-
-  public DateTime FechaPrimeraDosis { get; set; } // Fecha de la primera dosis
-
-  // Relación 1:N con Detalles
-  public ICollection<EsquemaVacunacionDetalle> Detalles { get; set; } // Lista de detalles del esquema
-
-  // Navigation properties
   [ForeignKey(nameof(VacunaId))]
   [JsonIgnore]
   public virtual Vacuna Vacuna { get; set; }
