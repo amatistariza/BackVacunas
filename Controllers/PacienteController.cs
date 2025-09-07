@@ -1,6 +1,8 @@
 ﻿using API.Domain.IServices;
 using API.Domain.Models;
 using API.Services;
+using API.DTO;
+using AutoMapper;
 using Microsoft.AspNetCore.Mvc;
 
 namespace API.Controllers;
@@ -10,10 +12,12 @@ namespace API.Controllers;
 public class PacienteController : ControllerBase
 {
     private readonly IPacienteService _pacienteService;
+    private readonly IMapper _mapper;
 
-    public PacienteController(IPacienteService pacienteService)
+    public PacienteController(IPacienteService pacienteService, IMapper mapper)
     {
         _pacienteService = pacienteService;
+        _mapper = mapper;
     }
 
     [HttpGet]
@@ -42,13 +46,19 @@ public class PacienteController : ControllerBase
     }
 
     [HttpPost]
-    public async Task<IActionResult> Add([FromBody] Paciente paciente)
+    public async Task<IActionResult> Add([FromBody] PacienteCreateDTO pacienteCreateDto)
     {
         if (!ModelState.IsValid)
             return BadRequest(ModelState);
 
+        // Map DTO to Entity
+        var paciente = _mapper.Map<Paciente>(pacienteCreateDto);
+        
         await _pacienteService.AddAsync(paciente);
-        return CreatedAtAction(nameof(GetById), new { id = paciente.Id }, paciente);
+        
+        // Return the created entity as response DTO
+        var createdPaciente = await _pacienteService.GetByIdAsync(paciente.Id);
+        return CreatedAtAction(nameof(GetById), new { id = paciente.Id }, createdPaciente);
     }
 
     [HttpPut("{id}")]

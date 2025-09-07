@@ -20,6 +20,7 @@ public class AplicationDbContext : DbContext
     public DbSet<EsquemaVacunacion> EsquemasVacunacion { get; set; }
     public DbSet<EsquemaVacunacionDetalle> EsquemaVacunacionDetalles { get; set; }
     public DbSet<AlarmaVacunacion> AlarmasVacunacion { get; set; }
+    public DbSet<RegistroVacunacion> RegistrosVacunacion { get; set; }
 
     public AplicationDbContext(DbContextOptions<AplicationDbContext> options) : base(options)
     {
@@ -55,6 +56,37 @@ public class AplicationDbContext : DbContext
             .HasOne(p => p.AntecedentesMedicos)
             .WithOne(a => a.Paciente)
             .HasForeignKey<AntecedentesMedicos>(a => a.PacienteId); // Configura la clave externa
+
+        // Configuraciones para evitar cascadas circulares
+        modelBuilder.Entity<EsquemaVacunacion>()
+            .HasOne(e => e.Paciente)
+            .WithMany()
+            .HasForeignKey(e => e.PacienteId)
+            .OnDelete(DeleteBehavior.Restrict);
+
+        modelBuilder.Entity<EsquemaVacunacion>()
+            .HasOne(e => e.Vacuna)
+            .WithMany()
+            .HasForeignKey(e => e.VacunaId)
+            .OnDelete(DeleteBehavior.Restrict);
+
+        modelBuilder.Entity<RegistroVacunacion>()
+            .HasOne(r => r.Paciente)
+            .WithMany()
+            .HasForeignKey(r => r.PacienteId)
+            .OnDelete(DeleteBehavior.Restrict);
+
+        modelBuilder.Entity<RegistroVacunacion>()
+            .HasOne(r => r.Vacuna)
+            .WithMany()
+            .HasForeignKey(r => r.VacunaId)
+            .OnDelete(DeleteBehavior.Restrict);
+
+        modelBuilder.Entity<RegistroVacunacion>()
+            .HasOne(r => r.EsquemaVacunacion)
+            .WithMany()
+            .HasForeignKey(r => r.EsquemaVacunacionId)
+            .OnDelete(DeleteBehavior.Restrict);
 
         //modelBuilder.Entity<Paciente>()
         //  .HasOne(p => p.EsquemaVacunacion)

@@ -324,7 +324,7 @@ namespace API.Migrations
                     b.Property<DateTime>("FechaRegistro")
                         .HasColumnType("datetime2");
 
-                    b.Property<int>("IntervaloMeses")
+                    b.Property<int>("IntervaloSemanas")
                         .HasColumnType("int");
 
                     b.Property<string>("Laboratorio")
@@ -352,6 +352,20 @@ namespace API.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
+                    b.Property<int>("CantidadTotalDosis")
+                        .HasColumnType("int");
+
+                    b.Property<int?>("DiasIntervalo")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime>("FechaPrimeraDosis")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("FrecuenciaAplicacion")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
+
                     b.Property<string>("MotivoNoIngreso")
                         .HasMaxLength(500)
                         .HasColumnType("nvarchar(500)");
@@ -376,7 +390,14 @@ namespace API.Migrations
                         .HasMaxLength(50)
                         .HasColumnType("nvarchar(50)");
 
+                    b.Property<int>("VacunaId")
+                        .HasColumnType("int");
+
                     b.HasKey("Id");
+
+                    b.HasIndex("PacienteId");
+
+                    b.HasIndex("VacunaId");
 
                     b.ToTable("EsquemasVacunacion");
                 });
@@ -539,7 +560,7 @@ namespace API.Migrations
                         .HasMaxLength(50)
                         .HasColumnType("nvarchar(50)");
 
-                    b.Property<int>("CuidadorId")
+                    b.Property<int?>("CuidadorId")
                         .HasColumnType("int");
 
                     b.Property<string>("DepartamentoResidencia")
@@ -583,20 +604,11 @@ namespace API.Migrations
                     b.Property<DateTime>("FechaNacimiento")
                         .HasColumnType("datetime2");
 
-                    b.Property<string>("Genero")
-                        .HasMaxLength(20)
-                        .HasColumnType("nvarchar(20)");
-
-                    b.Property<string>("IndicativoTelefono")
-                        .HasMaxLength(10)
-                        .HasColumnType("nvarchar(10)");
-
                     b.Property<string>("LugarAtencionParto")
-                        .IsRequired()
                         .HasMaxLength(100)
                         .HasColumnType("nvarchar(100)");
 
-                    b.Property<int>("MadreId")
+                    b.Property<int?>("MadreId")
                         .HasColumnType("int");
 
                     b.Property<string>("MunicipioResidencia")
@@ -671,6 +683,60 @@ namespace API.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("Pacientes", (string)null);
+                });
+
+            modelBuilder.Entity("API.Domain.Models.RegistroVacunacion", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("EsquemaVacunacionId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("EstadoRegistro")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
+
+                    b.Property<DateTime>("FechaAplicacion")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime?>("FechaProximaDosis")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime>("FechaRegistro")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int>("NumeroDosis")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Observaciones")
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
+                    b.Property<int>("PacienteId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("UsuarioRegistro")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<int>("VacunaId")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("EsquemaVacunacionId");
+
+                    b.HasIndex("PacienteId");
+
+                    b.HasIndex("VacunaId");
+
+                    b.ToTable("RegistrosVacunacion");
                 });
 
             modelBuilder.Entity("API.Domain.Models.Usuario", b =>
@@ -756,6 +822,25 @@ namespace API.Migrations
                     b.Navigation("Paciente");
                 });
 
+            modelBuilder.Entity("API.Domain.Models.EsquemaVacunacion", b =>
+                {
+                    b.HasOne("API.Domain.Models.Paciente", "Paciente")
+                        .WithMany()
+                        .HasForeignKey("PacienteId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("API.Domain.Models.Esquema.Vacuna", "Vacuna")
+                        .WithMany()
+                        .HasForeignKey("VacunaId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("Paciente");
+
+                    b.Navigation("Vacuna");
+                });
+
             modelBuilder.Entity("API.Domain.Models.EsquemaVacunacionDetalle", b =>
                 {
                     b.HasOne("API.Domain.Models.Esquema.Diluyente", "Diluyente")
@@ -787,6 +872,33 @@ namespace API.Migrations
                     b.Navigation("Jeringa");
 
                     b.Navigation("Suero");
+
+                    b.Navigation("Vacuna");
+                });
+
+            modelBuilder.Entity("API.Domain.Models.RegistroVacunacion", b =>
+                {
+                    b.HasOne("API.Domain.Models.EsquemaVacunacion", "EsquemaVacunacion")
+                        .WithMany()
+                        .HasForeignKey("EsquemaVacunacionId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("API.Domain.Models.Paciente", "Paciente")
+                        .WithMany()
+                        .HasForeignKey("PacienteId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("API.Domain.Models.Esquema.Vacuna", "Vacuna")
+                        .WithMany()
+                        .HasForeignKey("VacunaId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("EsquemaVacunacion");
+
+                    b.Navigation("Paciente");
 
                     b.Navigation("Vacuna");
                 });

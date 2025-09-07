@@ -1,22 +1,28 @@
 using API.Domain.Models;
+using API.Domain.IRepositories;
 
 namespace API.Domain.IRepositories
 {
     public interface IAlarmaVacunacionRepository : IRepository<AlarmaVacunacion>
     {
-        // Buscar alarmas para un paciente específico
-        Task<IEnumerable<AlarmaVacunacion>> GetAlarmasByPacienteAsync(int pacienteId);
+        /// <summary>
+        /// Obtiene las alarmas para vacunaciones del mes actual
+        /// </summary>
+        Task<IEnumerable<AlarmaVacunacion>> GetVacunacionesProximasMesActualAsync();
         
-        // Buscar alarmas pendientes (próximas a vencer en el mes actual)
-        Task<IEnumerable<AlarmaVacunacion>> GetAlarmasPendientesAsync();
+        /// <summary>
+        /// Marca una alarma como notificada
+        /// </summary>
+        Task<bool> MarcarComoNotificadaAsync(int alarmaId);
         
-        // Buscar alarmas por vacuna
-        Task<IEnumerable<AlarmaVacunacion>> GetAlarmasByVacunaAsync(int vacunaId);
+        /// <summary>
+        /// Obtiene las alarmas vencidas validando por semanas
+        /// </summary>
+        Task<IEnumerable<AlarmaVacunacion>> GetAlarmasVencidasPorSemanasAsync();
         
-        // Marcar una alarma como notificada
-        Task MarcarComoNotificadaAsync(int alarmaId);
-        
-        // Marcar un esquema como completado
-        Task CompletarEsquemaAsync(int alarmaId);
+        /// <summary>
+        /// Verifica si ya existe una alarma para el paciente y vacuna
+        /// </summary>
+        Task<bool> ExisteAlarmaPendienteAsync(int pacienteId, int vacunaId);
     }
 }

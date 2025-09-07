@@ -15,116 +15,88 @@ namespace API.Controllers
             _alarmaService = alarmaService;
         }
 
-        [HttpGet("paciente/{pacienteId}")]
-        public async Task<IActionResult> GetAlarmasByPaciente(int pacienteId)
+        /// <summary>
+        /// Obtiene las vacunaciones próximas del mes actual
+        /// </summary>
+        [HttpGet("proximas-mes-actual")]
+        public async Task<IActionResult> GetVacunacionesProximasMesActual()
         {
             try
             {
-                var alarmas = await _alarmaService.GetAlarmasByPacienteAsync(pacienteId);
-                return Ok(alarmas);
+                var alarmas = await _alarmaService.GetVacunacionesProximasMesActualAsync();
+                return Ok(new { 
+                    mensaje = "Vacunaciones próximas del mes actual obtenidas exitosamente.",
+                    data = alarmas,
+                    total = alarmas.Count()
+                });
             }
             catch (Exception ex)
             {
-                return StatusCode(500, new { mensaje = "Ocurrió un error al obtener las alarmas.", error = ex.Message });
+                return StatusCode(500, new { 
+                    mensaje = "Ocurrió un error al obtener las vacunaciones próximas.", 
+                    error = ex.Message,
+                    inner = ex.InnerException?.Message
+                });
             }
         }
 
-        [HttpGet("pendientes")]
-        public async Task<IActionResult> GetAlarmasPendientes()
+        /// <summary>
+        /// Marca una alarma como notificada (ya se notificó al paciente)
+        /// </summary>
+        [HttpPut("{alarmaId}/marcar-notificada")]
+        public async Task<IActionResult> MarcarAlarmaComoNotificada(int alarmaId)
         {
             try
             {
-                var alarmas = await _alarmaService.GetAlarmasPendientesAsync();
-                return Ok(alarmas);
+                var resultado = await _alarmaService.MarcarComoNotificadaAsync(alarmaId);
+                if (resultado)
+                {
+                    return Ok(new { 
+                        mensaje = "Alarma marcada como notificada exitosamente.",
+                        alarmaId = alarmaId
+                    });
+                }
+                else
+                {
+                    return NotFound(new { 
+                        mensaje = "No se encontró la alarma especificada.",
+                        alarmaId = alarmaId
+                    });
+                }
             }
             catch (Exception ex)
             {
-                return StatusCode(500, new { mensaje = "Ocurrió un error al obtener las alarmas pendientes.", error = ex.Message });
+                return StatusCode(500, new { 
+                    mensaje = "Ocurrió un error al marcar la alarma como notificada.", 
+                    error = ex.Message,
+                    inner = ex.InnerException?.Message
+                });
             }
         }
 
-        [HttpGet("vacuna/{vacunaId}")]
-        public async Task<IActionResult> GetAlarmasByVacuna(int vacunaId)
+        /// <summary>
+        /// Obtiene las alarmas vencidas (validación por semanas)
+        /// </summary>
+        [HttpGet("vencidas")]
+        public async Task<IActionResult> GetAlarmasVencidas()
         {
             try
             {
-                var alarmas = await _alarmaService.GetAlarmasByVacunaAsync(vacunaId);
-                return Ok(alarmas);
+                var alarmas = await _alarmaService.GetAlarmasVencidasPorSemanasAsync();
+                return Ok(new { 
+                    mensaje = "Alarmas vencidas obtenidas exitosamente.",
+                    data = alarmas,
+                    total = alarmas.Count()
+                });
             }
             catch (Exception ex)
             {
-                return StatusCode(500, new { mensaje = "Ocurrió un error al obtener las alarmas por vacuna.", error = ex.Message });
+                return StatusCode(500, new { 
+                    mensaje = "Ocurrió un error al obtener las alarmas vencidas.", 
+                    error = ex.Message,
+                    inner = ex.InnerException?.Message
+                });
             }
         }
-
-        [HttpPost("crear")]
-        public async Task<IActionResult> CrearAlarma([FromBody] CrearAlarmaDTO dto)
-        {
-            try
-            {
-                await _alarmaService.CrearAlarmaAsync(dto.PacienteId, dto.VacunaId, dto.DosisActual, dto.FechaAplicacion);
-                return Ok(new { mensaje = "Alarma creada correctamente." });
-            }
-            catch (Exception ex)
-            {
-                return StatusCode(500, new { mensaje = "Ocurrió un error al crear la alarma.", error = ex.Message });
-            }
-        }
-
-        [HttpPut("notificar/{alarmaId}")]
-        public async Task<IActionResult> MarcarComoNotificada(int alarmaId)
-        {
-            try
-            {
-                await _alarmaService.MarcarComoNotificadaAsync(alarmaId);
-                return Ok(new { mensaje = "Alarma marcada como notificada." });
-            }
-            catch (Exception ex)
-            {
-                return StatusCode(500, new { mensaje = "Ocurrió un error al marcar la alarma como notificada.", error = ex.Message });
-            }
-        }
-
-        [HttpPost("registrar-dosis")]
-        public async Task<IActionResult> RegistrarSiguienteDosis([FromBody] RegistrarDosisDTO dto)
-        {
-            try
-            {
-                await _alarmaService.RegistrarSiguienteDosisAsync(dto.AlarmaId, dto.FechaAplicacion);
-                return Ok(new { mensaje = "Siguiente dosis registrada correctamente." });
-            }
-            catch (Exception ex)
-            {
-                return StatusCode(500, new { mensaje = "Ocurrió un error al registrar la siguiente dosis.", error = ex.Message });
-            }
-        }
-
-        [HttpPut("completar/{alarmaId}")]
-        public async Task<IActionResult> CompletarEsquema(int alarmaId)
-        {
-            try
-            {
-                await _alarmaService.CompletarEsquemaAsync(alarmaId);
-                return Ok(new { mensaje = "Esquema de vacunación completado." });
-            }
-            catch (Exception ex)
-            {
-                return StatusCode(500, new { mensaje = "Ocurrió un error al completar el esquema.", error = ex.Message });
-            }
-        }
-    }
-
-    public class CrearAlarmaDTO
-    {
-        public int PacienteId { get; set; }
-        public int VacunaId { get; set; }
-        public int DosisActual { get; set; }
-        public DateTime FechaAplicacion { get; set; }
-    }
-
-    public class RegistrarDosisDTO
-    {
-        public int AlarmaId { get; set; }
-        public DateTime FechaAplicacion { get; set; }
     }
 }

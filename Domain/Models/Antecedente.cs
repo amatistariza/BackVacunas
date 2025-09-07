@@ -1,11 +1,13 @@
 ﻿using System.ComponentModel.DataAnnotations.Schema;
 using System.ComponentModel.DataAnnotations;
+using Newtonsoft.Json;
 
 namespace API.Domain.Models;
 
 public class Antecedente
 {
     [Key]
+    [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
     public int Id { get; set; } // Identificador único del antecedente
 
     [Required]
@@ -26,5 +28,6 @@ public class Antecedente
     public int PacienteId { get; set; } // Identificador del paciente asociado
 
     [ForeignKey("PacienteId")]
+    [JsonIgnore]
     public Paciente Paciente { get; set; } // Relación con la entidad Paciente
 }

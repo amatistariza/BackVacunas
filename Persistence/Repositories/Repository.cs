@@ -6,7 +6,7 @@ namespace API.Persistence.Repositories;
 
 public class Repository<T> : IRepository<T> where T : class
 {
-    private readonly AplicationDbContext _context;
+    protected readonly AplicationDbContext _context;
     private readonly DbSet<T> _dbSet;
 
     public Repository(AplicationDbContext context)

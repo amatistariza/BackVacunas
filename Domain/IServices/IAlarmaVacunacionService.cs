@@ -4,25 +4,24 @@ namespace API.Domain.IServices
 {
     public interface IAlarmaVacunacionService
     {
-        // Crear una nueva alarma cuando se registra una dosis
-        Task CrearAlarmaAsync(int pacienteId, int vacunaId, int dosisActual, DateTime fechaAplicacion);
+        /// <summary>
+        /// Obtiene las vacunaciones próximas del mes actual
+        /// </summary>
+        Task<IEnumerable<AlarmaVacunacion>> GetVacunacionesProximasMesActualAsync();
         
-        // Obtener alarmas pendientes para un paciente
-        Task<IEnumerable<AlarmaVacunacion>> GetAlarmasByPacienteAsync(int pacienteId);
+        /// <summary>
+        /// Marca una alarma como notificada (ya se notificó al paciente)
+        /// </summary>
+        Task<bool> MarcarComoNotificadaAsync(int alarmaId);
         
-        // Obtener alarmas que vencen en el mes actual
-        Task<IEnumerable<AlarmaVacunacion>> GetAlarmasPendientesAsync();
+        /// <summary>
+        /// Obtiene las alarmas vencidas validando por semanas
+        /// </summary>
+        Task<IEnumerable<AlarmaVacunacion>> GetAlarmasVencidasPorSemanasAsync();
         
-        // Obtener alarmas por tipo de vacuna
-        Task<IEnumerable<AlarmaVacunacion>> GetAlarmasByVacunaAsync(int vacunaId);
-        
-        // Marcar una alarma como notificada
-        Task MarcarComoNotificadaAsync(int alarmaId);
-        
-        // Registrar la aplicación de la siguiente dosis
-        Task RegistrarSiguienteDosisAsync(int alarmaId, DateTime fechaAplicacion);
-        
-        // Marcar un esquema como completado
-        Task CompletarEsquemaAsync(int alarmaId);
+        /// <summary>
+        /// Crea alarmas automáticamente cuando se llama al endpoint de esquema vacunación
+        /// </summary>
+        Task CrearAlarmaDesdeEsquemaAsync(int pacienteId, int vacunaId, int numeroDosiActual, DateTime fechaUltimaAplicacion);
     }
 }

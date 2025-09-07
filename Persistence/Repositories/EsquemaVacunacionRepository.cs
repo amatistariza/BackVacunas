@@ -7,11 +7,8 @@ namespace API.Persistence.Repositories
 {
     public class EsquemaVacunacionRepository : Repository<EsquemaVacunacion>, IEsquemaVacunacionRepository
     {
-        private readonly AplicationDbContext _context;
-
         public EsquemaVacunacionRepository(AplicationDbContext context) : base(context)
         {
-            _context = context;
         }
 
         public async Task<EsquemaVacunacion> GetEsquemaConDetallesAsync(int esquemaId)
@@ -25,6 +22,8 @@ namespace API.Persistence.Repositories
                     .ThenInclude(d => d.Diluyente)
                 .Include(e => e.Detalles)
                     .ThenInclude(d => d.Jeringa)
+                .Include(e => e.Paciente)
+                .Include(e => e.Vacuna)
                 .FirstOrDefaultAsync(e => e.Id == esquemaId);
         }
     }

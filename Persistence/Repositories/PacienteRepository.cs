@@ -36,7 +36,6 @@ namespace API.Persistence.Repositories
                     FechaNacimiento = e.FechaNacimiento,
                     EsquemaCompleto = e.EsquemaCompleto,
                     Sexo = e.Sexo,
-                    Genero = e.Genero,
                     OrientacionSexual = e.OrientacionSexual,
                     EdadGestacionalSemanas = e.EdadGestacionalSemanas,
                     PaisNacimiento = e.PaisNacimiento,
@@ -56,7 +55,6 @@ namespace API.Persistence.Repositories
                     ComunaLocalidad = e.ComunaLocalidad,
                     Area = e.Area,
                     Direccion = e.Direccion,
-                    IndicativoTelefono = e.IndicativoTelefono,
                     TelefonoFijo = e.TelefonoFijo,
                     Celular = e.Celular,
                     Email = e.Email,
@@ -71,7 +69,7 @@ namespace API.Persistence.Repositories
                     }).ToList(),
                     MadreId = e.MadreId,
                     CuidadorId = e.CuidadorId,
-                    CondicionUsuaria = new CondicionUsuariaDTO()
+                    CondicionUsuaria = e.CondicionUsuaria != null ? new CondicionUsuariaDTO()
                     {
                         Id = e.CondicionUsuaria.Id,
                         Condicion = e.CondicionUsuaria.Condicion,
@@ -80,15 +78,15 @@ namespace API.Persistence.Repositories
                         SemanasGestacion = e.CondicionUsuaria.SemanasGestacion,
                         FechaProbableParto = e.CondicionUsuaria.FechaProbableParto,
                         CantidadEmbarazosPrevios = e.CondicionUsuaria.CantidadEmbarazosPrevios
-                    },
-                    AntecedentesMedicos = new AntecedentesMedicosDTO()
+                    } : null,
+                    AntecedentesMedicos = e.AntecedentesMedicos != null ? new AntecedentesMedicosDTO()
                     {
                         Id = e.AntecedentesMedicos.Id,
                         ContraindicacionVacunacion = e.AntecedentesMedicos.ContraindicacionVacunacion,
                         DetalleContraindicacion = e.AntecedentesMedicos.DetalleContraindicacion,
                         ReaccionBiologicos = e.AntecedentesMedicos.ReaccionBiologicos,
                         DetalleReaccion = e.AntecedentesMedicos.DetalleReaccion
-                    }
+                    } : null
                 })
                 .FirstOrDefaultAsync();
 
@@ -106,7 +104,6 @@ namespace API.Persistence.Repositories
                         PrimerApellido = m.PrimerApellido,
                         SegundoApellido = m.SegundoApellido,
                         CorreoElectronico = m.CorreoElectronico,
-                        IndicativoTelefono = m.IndicativoTelefono,
                         TelefonoFijo = m.TelefonoFijo,
                         Celular = m.Celular,
                         RegimenAfiliacion = m.RegimenAfiliacion,
@@ -128,7 +125,6 @@ namespace API.Persistence.Repositories
                         SegundoApellido = c.SegundoApellido,
                         Parentesco = c.Parentesco,
                         CorreoElectronico = c.CorreoElectronico,
-                        IndicativoTelefono = c.IndicativoTelefono,
                         TelefonoFijo = c.TelefonoFijo,
                         Celular = c.Celular
                     })

@@ -11,5 +11,5 @@ public class Vacuna
     
     // Nuevas propiedades para el sistema de alarmas
     public int NumeroDosis { get; set; } // Número total de dosis que se deben aplicar
-    public int IntervaloMeses { get; set; } // Intervalo en meses entre cada dosis
+    public int IntervaloSemanas { get; set; } // Intervalo en semanas entre cada dosis
 }

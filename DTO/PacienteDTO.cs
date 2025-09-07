@@ -44,8 +44,6 @@ namespace API.Domain.DTOs
         [StringLength(10)]
         public string Sexo { get; set; }
 
-        [StringLength(20)]
-        public string Genero { get; set; }
 
         [StringLength(50)]
         public string OrientacionSexual { get; set; }
@@ -60,9 +58,8 @@ namespace API.Domain.DTOs
         [StringLength(50)]
         public string EstatusMigratorio { get; set; }
 
-        [Required]
-        [StringLength(100)]
-        public string LugarAtencionParto { get; set; }
+    [StringLength(100)]
+    public string LugarAtencionParto { get; set; }
 
         [Required]
         [StringLength(50)]
@@ -113,9 +110,6 @@ namespace API.Domain.DTOs
         [StringLength(200)]
         public string Direccion { get; set; }
 
-        [StringLength(10)]
-        public string IndicativoTelefono { get; set; }
-
         [StringLength(15)]
         public string TelefonoFijo { get; set; }
 
@@ -130,10 +124,10 @@ namespace API.Domain.DTOs
 
         [Required]
         public bool AutorizaEnvioCorreo { get; set; }
-        public int MadreId { get; set; }
+        public int? MadreId { get; set; }
 
         public MadreDTO Madre { get; set; }
-        public int CuidadorId { get; set; }
+        public int? CuidadorId { get; set; }
 
         public CuidadorDTO Cuidador { get; set; }
 
@@ -176,9 +170,6 @@ namespace API.Domain.DTOs
         [Required]
         [EmailAddress]
         public string CorreoElectronico { get; set; }
-
-        [StringLength(10)]
-        public string IndicativoTelefono { get; set; }
 
         [StringLength(15)]
         public string TelefonoFijo { get; set; }
@@ -233,9 +224,6 @@ namespace API.Domain.DTOs
         [EmailAddress]
         public string CorreoElectronico { get; set; }
 
-        [StringLength(10)]
-        public string IndicativoTelefono { get; set; }
-
         [StringLength(15)]
         public string TelefonoFijo { get; set; }
 
@@ -266,17 +254,17 @@ namespace API.Domain.DTOs
     public class CondicionUsuariaDTO
     {
         [Key]
-        public int Id { get; set; } // Identificador único de la condición
+        public int Id { get; set; } // Identificador ï¿½nico de la condiciï¿½n
 
         [Required]
         [StringLength(100)]
-        public string Condicion { get; set; } // Condición de la usuaria (obligatorio)
+        public string Condicion { get; set; } // Condiciï¿½n de la usuaria (obligatorio)
 
-        public bool Gestante { get; set; } // Indica si la usuaria está gestante
+        public bool Gestante { get; set; } // Indica si la usuaria estï¿½ gestante
 
-        public DateTime? FechaUltimaMenstruacion { get; set; } // Fecha de última menstruación (opcional)
+        public DateTime? FechaUltimaMenstruacion { get; set; } // Fecha de ï¿½ltima menstruaciï¿½n (opcional)
 
-        public int? SemanasGestacion { get; set; } // Semanas de gestación (opcional)
+        public int? SemanasGestacion { get; set; } // Semanas de gestaciï¿½n (opcional)
 
         public DateTime? FechaProbableParto { get; set; } // Fecha probable de parto (opcional)
 
@@ -286,25 +274,25 @@ namespace API.Domain.DTOs
     public class AntecedentesMedicosDTO
     {
         [Key]
-        public int Id { get; set; } // Identificador único del antecedente médico
+        public int Id { get; set; } // Identificador ï¿½nico del antecedente mï¿½dico
 
         [Required]
-        public bool ContraindicacionVacunacion { get; set; } // ¿Sufre o ha sufrido algo que contraindique la vacunación?
+        public bool ContraindicacionVacunacion { get; set; } // ï¿½Sufre o ha sufrido algo que contraindique la vacunaciï¿½n?
 
         [StringLength(500)]
-        public string DetalleContraindicacion { get; set; } // Detalle de la contraindicación (opcional)
+        public string DetalleContraindicacion { get; set; } // Detalle de la contraindicaciï¿½n (opcional)
 
         [Required]
-        public bool ReaccionBiologicos { get; set; } // ¿Ha presentado reacción moderada o severa a biológicos anteriores?
+        public bool ReaccionBiologicos { get; set; } // ï¿½Ha presentado reacciï¿½n moderada o severa a biolï¿½gicos anteriores?
 
         [StringLength(500)]
-        public string DetalleReaccion { get; set; } // Detalle de la reacción a biológicos (opcional)
+        public string DetalleReaccion { get; set; } // Detalle de la reacciï¿½n a biolï¿½gicos (opcional)
     }
 
     public class EsquemaVacunaDTO
     {
         [Key]
-        public int Id { get; set; } // Identificador único del esquema
+        public int Id { get; set; } // Identificador ï¿½nico del esquema
 
         [Required]
         [StringLength(50)]
@@ -323,7 +311,7 @@ namespace API.Domain.DTOs
         [StringLength(500)]
         public string? Observaciones { get; set; } // Observaciones adicionales (opcional)
 
-        // Relación 1:N con Detalles
+        // Relaciï¿½n 1:N con Detalles
         public ICollection<EsquemaVacunacionDetalle> Detalles { get; set; } // Lista de detalles del esquema
     }
 }

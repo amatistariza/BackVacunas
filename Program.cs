@@ -5,6 +5,7 @@ using API.Domain.Models.Esquema;
 using API.Persistence.Context;
 using API.Persistence.Repositories;
 using API.Services;
+using API.Mappings;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
@@ -19,6 +20,9 @@ if (das == 1)
     // Configuración de DbContext
     builder.Services.AddDbContext<AplicationDbContext>(options =>
         options.UseSqlServer(builder.Configuration.GetConnectionString("Conexion")));
+
+    // AutoMapper
+    builder.Services.AddAutoMapper(typeof(MappingProfile));
 
     // Servicios
     builder.Services.AddScoped<IUsuarioService, UsuarioService>();
@@ -150,6 +154,13 @@ if (das == 1)
 
     app.MapControllers();
 
+    // Seeding de base de datos (solo primera vez / ambiente dev)
+    using (var scope = app.Services.CreateScope())
+    {
+        var ctx = scope.ServiceProvider.GetRequiredService<AplicationDbContext>();
+        await API.Services.DatabaseSeeder.SeedAsync(ctx);
+    }
+
     app.Run();
 }
 else
@@ -159,62 +170,6 @@ else
     // Configuración de DbContext
     builder.Services.AddDbContext<AplicationDbContext>(options =>
         options.UseSqlServer(builder.Configuration.GetConnectionString("Conexion")));
-
-    // Servicios
-    builder.Services.AddScoped<IUsuarioService, UsuarioService>();
-    builder.Services.AddScoped<ILoginService, LoginService>();
-    builder.Services.AddScoped<IVacunaService, VacunaService>();
-    builder.Services.AddScoped<IJeringaService, JeringaService>();
-    builder.Services.AddScoped<IDiluyenteService, DiluyenteService>();
-    builder.Services.AddScoped<ISueroService, SueroService>();
-    builder.Services.AddScoped<IMadreService, MadreService>();
-    builder.Services.AddScoped<ICuidadorService, CuidadorService>();
-    builder.Services.AddScoped<IAntecedenteService, AntecedenteService>();
-    builder.Services.AddScoped<ICondicionUsuariaService, CondicionUsuariaService>();
-    builder.Services.AddScoped<IAntecedentesMedicosService, AntecedentesMedicosService>();
-    builder.Services.AddScoped<IEsquemaVacunacionService, EsquemaVacunacionService>();
-    builder.Services.AddScoped<IPacienteService, PacienteService>();
-    builder.Services.AddScoped<IAlarmaVacunacionService, AlarmaVacunacionService>();
-
-    // Repositorios
-    builder.Services.AddScoped<IUsuarioRepository, UsuarioRepository>();
-    builder.Services.AddScoped<ILoginRepository, LoginRepository>();
-    builder.Services.AddScoped<IVacunaRepository, VacunaRepository>();
-    builder.Services.AddScoped<IJeringaRepository, JeringaRepository>();
-    builder.Services.AddScoped<IDiluyenteRepository, DiluyenteRepository>();
-    builder.Services.AddScoped<ISueroRepository, SueroRepository>();
-    builder.Services.AddScoped<IMadreRepository, MadreRepository>();
-    builder.Services.AddScoped<ICuidadorRepository, CuidadorRepository>();
-    builder.Services.AddScoped<IAntecedenteRepository, AntecedenteRepository>();
-    builder.Services.AddScoped<ICondicionUsuariaRepository, CondicionUsuariaRepository>();
-    builder.Services.AddScoped<IAntecedentesMedicosRepository, AntecedentesMedicosRepository>();
-    builder.Services.AddScoped<IEsquemaVacunacionRepository, EsquemaVacunacionRepository>();
-    builder.Services.AddScoped<IPacienteRepository, PacienteRepository>();
-    builder.Services.AddScoped<IAlarmaVacunacionRepository, AlarmaVacunacionRepository>();
-
-    builder.Services.AddScoped<IRepository<Vacuna>, VacunaRepository>();
-    builder.Services.AddScoped<IRepository<Jeringa>, JeringaRepository>();
-    builder.Services.AddScoped<IRepository<Diluyente>, DiluyenteRepository>();
-    builder.Services.AddScoped<IRepository<Suero>, SueroRepository>();
-    builder.Services.AddScoped<IRepository<Madre>, MadreRepository>();
-    builder.Services.AddScoped<IRepository<Cuidador>, CuidadorRepository>();
-    builder.Services.AddScoped<IRepository<Antecedente>, AntecedenteRepository>();
-    builder.Services.AddScoped<IRepository<CondicionUsuaria>, CondicionUsuariaRepository>();
-    builder.Services.AddScoped<IRepository<AntecedentesMedicos>, AntecedentesMedicosRepository>();
-    builder.Services.AddScoped<IRepository<EsquemaVacunacion>, EsquemaVacunacionRepository>();
-    builder.Services.AddScoped<IRepository<Paciente>, PacienteRepository>();
-    builder.Services.AddScoped<IRepository<AlarmaVacunacion>, AlarmaVacunacionRepository>();
-
-    builder.Services.AddScoped<IBaseService<Vacuna>, VacunaService>();
-    builder.Services.AddScoped<IBaseService<Jeringa>, JeringaService>();
-    builder.Services.AddScoped<IBaseService<Diluyente>, DiluyenteService>();
-    builder.Services.AddScoped<IBaseService<Suero>, SueroService>();
-    builder.Services.AddScoped<IBaseService<Madre>, MadreService>();
-    builder.Services.AddScoped<IBaseService<Cuidador>, CuidadorService>();
-    builder.Services.AddScoped<IBaseService<Antecedente>, AntecedenteService>();
-    builder.Services.AddScoped<IBaseService<CondicionUsuaria>, CondicionUsuariaService>();
-    builder.Services.AddScoped<IBaseService<AntecedentesMedicos>, AntecedentesMedicosService>();
-    builder.Services.AddScoped<IBaseService<Paciente>, PacienteService>();
 
     // Configuración de CORS
     builder.Services.AddCors(options =>

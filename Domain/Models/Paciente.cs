@@ -6,18 +6,19 @@ using System.ComponentModel.DataAnnotations.Schema;
 public class Paciente
 {
     [Key]
-    public int Id { get; set; } // Identificador 鷑ico del paciente
+    [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
+    public int Id { get; set; } // Identificador 煤nico del paciente
 
     [Required]
-    public DateTime FechaAtencion { get; set; } // Fecha de atenci髇 (d韆/mes/a駉)
-
-    [Required]
-    [StringLength(20)]
-    public string TipoIdentificacion { get; set; } // Tipo de identificaci髇 (ej., CC, TI)
+    public DateTime FechaAtencion { get; set; } // Fecha de atenci贸n (d铆a/mes/a帽o)
 
     [Required]
     [StringLength(20)]
-    public string NumeroIdentificacion { get; set; } // N鷐ero de identificaci髇 (obligatorio)
+    public string TipoIdentificacion { get; set; } // Tipo de identificaci贸n (ej., CC, TI)
+
+    [Required]
+    [StringLength(20)]
+    public string NumeroIdentificacion { get; set; } // N煤mero de identificaci贸n (obligatorio)
 
     [Required]
     [StringLength(50)]
@@ -34,7 +35,7 @@ public class Paciente
     public string SegundoApellido { get; set; } // Segundo apellido (opcional)
 
     [Required]
-    public DateTime FechaNacimiento { get; set; } // Fecha de nacimiento (d韆/mes/a駉)
+    public DateTime FechaNacimiento { get; set; } // Fecha de nacimiento (d铆a/mes/a帽o)
 
     public bool EsquemaCompleto { get; set; } // Esquema completo (booleano)
 
@@ -42,29 +43,25 @@ public class Paciente
     [StringLength(10)]
     public string Sexo { get; set; } // Sexo (obligatorio)
 
-    [StringLength(20)]
-    public string Genero { get; set; } // G閚ero (opcional)
-
     [StringLength(50)]
-    public string OrientacionSexual { get; set; } // Orientaci髇 sexual (opcional)
+    public string OrientacionSexual { get; set; } // Orientaci贸n sexual (opcional)
 
     public int? EdadGestacionalSemanas { get; set; } // Edad gestacional en semanas (nullable)
 
     [Required]
     [StringLength(50)]
-    public string PaisNacimiento { get; set; } // Pa韘 de nacimiento (obligatorio)
+    public string PaisNacimiento { get; set; } // Pa铆s de nacimiento (obligatorio)
 
     [Required]
     [StringLength(50)]
     public string EstatusMigratorio { get; set; } // Estatus migratorio (obligatorio)
 
-    [Required]
     [StringLength(100)]
-    public string LugarAtencionParto { get; set; } // Lugar de atenci髇 del parto (hospital, obligatorio)
+    public string LugarAtencionParto { get; set; } // Lugar de atenci贸n del parto (hospital, opcional)
 
     [Required]
     [StringLength(50)]
-    public string RegimenAfiliacion { get; set; } // R間imen de afiliaci髇 (obligatorio)
+    public string RegimenAfiliacion { get; set; } // R茅gimen de afiliaci贸n (obligatorio)
 
     [Required]
     [StringLength(100)]
@@ -72,7 +69,7 @@ public class Paciente
 
     [Required]
     [StringLength(50)]
-    public string PertenenciaEtnica { get; set; } // Pertenencia 閠nica (obligatorio)
+    public string PertenenciaEtnica { get; set; } // Pertenencia 茅tnica (obligatorio)
 
     [Required]
     public bool Desplazado { get; set; } // Indica si es desplazado (booleano, obligatorio)
@@ -84,14 +81,14 @@ public class Paciente
     public bool Fallecido { get; set; } // Indica si ha fallecido (booleano, obligatorio)
 
     [Required]
-    public bool VictimaConflictoArmado { get; set; } // Indica si es v韈tima del conflicto armado (booleano, obligatorio)
+    public bool VictimaConflictoArmado { get; set; } // Indica si es v铆ctima del conflicto armado (booleano, obligatorio)
 
     [Required]
     public bool EstudiaActualmente { get; set; } // Indica si estudia actualmente (booleano, obligatorio)
 
     [Required]
     [StringLength(50)]
-    public string PaisResidencia { get; set; } // Pa韘 de residencia (obligatorio)
+    public string PaisResidencia { get; set; } // Pa铆s de residencia (obligatorio)
 
     [Required]
     [StringLength(50)]
@@ -106,46 +103,41 @@ public class Paciente
 
     [Required]
     [StringLength(50)]
-    public string Area { get; set; } // 羠ea (rural, urbana, obligatorio)
+    public string Area { get; set; } // 脕rea (rural, urbana, obligatorio)
 
     [StringLength(200)]
-    public string Direccion { get; set; } // Direcci髇 con nomenclatura (opcional)
-
-    [StringLength(10)]
-    public string IndicativoTelefono { get; set; } // Indicativo del tel閒ono fijo (opcional)
+    public string Direccion { get; set; } // Direcci贸n con nomenclatura (opcional)
 
     [StringLength(15)]
-    public string TelefonoFijo { get; set; } // Tel閒ono fijo (opcional)
+    public string TelefonoFijo { get; set; } // Tel茅fono fijo (opcional)
 
     [StringLength(15)]
     public string Celular { get; set; } // Celular (opcional)
 
     [EmailAddress]
-    public string Email { get; set; } // Correo electr髇ico (opcional)
+    public string Email { get; set; } // Correo electr贸nico (opcional)
 
     [Required]
-    public bool AutorizaLlamadasTelefonicas { get; set; } // Autoriza llamadas telef髇icas (booleano, obligatorio)
+    public bool AutorizaLlamadasTelefonicas { get; set; } // Autoriza llamadas telef贸nicas (booleano, obligatorio)
 
     [Required]
-    public bool AutorizaEnvioCorreo { get; set; } // Autoriza env韔 de correos (booleano, obligatorio)
+    public bool AutorizaEnvioCorreo { get; set; } // Autoriza env铆o de correos (booleano, obligatorio)
 
-    // Relaci髇 con Antecedentes
+    // Relaci贸n con Antecedentes
     public ICollection<Antecedente> Antecedentes { get; set; }
 
-    //// Relaci髇 con Madre
-    [Required]
-    public int MadreId { get; set; } // Identificador de la madre
+    //// Relaci贸n con Madre (opcional)
+    public int? MadreId { get; set; } // Identificador de la madre (opcional)
 
-    //// Relaci髇 con Cuidador
-    [Required]
-    public int CuidadorId { get; set; } // Identificador del cuidador
+    //// Relaci贸n con Cuidador (opcional)
+    public int? CuidadorId { get; set; } // Identificador del cuidador (opcional)
 
-    // Relaci髇 1:1 con CondicionUsuaria
+    // Relaci贸n 1:1 con CondicionUsuaria
     public CondicionUsuaria CondicionUsuaria { get; set; }
 
-    // Relaci髇 1:1 con AntecedentesMedicos
+    // Relaci贸n 1:1 con AntecedentesMedicos
     public AntecedentesMedicos AntecedentesMedicos { get; set; }
 
-    //// Relaci髇 1:1 con EsquemaVacunacion
+    //// Relaci贸n 1:1 con EsquemaVacunacion
     //public EsquemaVacunacion EsquemaVacunacion { get; set; }
 }
