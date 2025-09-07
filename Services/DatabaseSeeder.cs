@@ -50,14 +50,6 @@ public static class DatabaseSeeder
             await ctx.SaveChangesAsync();
         }
 
-        if (!ctx.Sueros.Any())
-        {
-            ctx.Sueros.AddRange(
-                new Suero { Nombre = "Antirrabico Humano", Lote = "SR-001", FrascosDisponibles = 100 },
-                new Suero { Nombre = "Inmunoglobulina Tetánica", Lote = "SR-002", FrascosDisponibles = 60 }
-            );
-            await ctx.SaveChangesAsync();
-        }
 
         if (!ctx.Madres.Any())
         {

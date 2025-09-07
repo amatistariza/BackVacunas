@@ -1,0 +1,98 @@
+# ---- Standard .NET build output ----
+bin/
+obj/
+
+# Compiled binaries (redundant with bin/ & obj/ but safe if alguno se copia a otra carpeta)
+*.dll
+*.exe
+*.pdb
+*.mdb
+*.so
+*.dylib
+*.a
+
+# Visual Studio + VS Code user settings
+*.user
+*.rsuser
+*.suo
+*.userosscache
+*.sln.docstates
+.vscode/
+
+# Logs / Dumps
+*.log
+*.tlog
+*.dmp
+
+# NuGet
+*.nupkg
+# Packages folder (if ever used)
+[Bb]ackages/
+# NuGet v3 cache
+~/.nuget/packages/
+
+# Build results
+[Dd]ebug/
+[Rr]elease/
+x64/
+x86/
+[Bb]uild/
+[Bb]in/[Dd]ebug/
+[Bb]in/[Rr]elease/
+
+# Test results
+[Tt]est[Rr]esult*/
+*.trx
+*.coverage
+*.coveragexml
+
+# Rider / JetBrains
+.idea/
+*.sln.iml
+
+# Temporary files
+[Tt]emp/
+~$*
+*.tmp
+*.bak
+*.swp
+
+# Generated files (EF Core Migrations snapshots are kept)
+# If you generate PDF/Reports into Rotativa folder, ignore its Outputs
+Rotativa/Temp/
+Rotativa/Generated/
+
+# Cache
+*.cache
+
+# System files
+.DS_Store
+Thumbs.db
+
+# Secrets (keep templates, ignore real local override if created)
+appsettings.*.local.json
+
+# Node tooling (if added later)
+node_modules/
+
+# Publish output
+publish/
+*.pubxml
+*.publish.xml
+
+# Coverage tools
+coverage/
+.coverage
+.lcov
+
+# Resharper
+_ReSharper*/
+*.[Rr]e[Ss]harper
+
+# Others observed in repo
+seed.sql
+# test input JSON samples (if not needed in prod) comment out if you wish to keep
+# test_paciente_create_dto.json
+# test_paciente_sin_ids.json
+
+# End of file

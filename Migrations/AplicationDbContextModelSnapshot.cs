@@ -288,28 +288,6 @@ namespace API.Migrations
                     b.ToTable("Jeringas");
                 });
 
-            modelBuilder.Entity("API.Domain.Models.Esquema.Suero", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<int>("FrascosDisponibles")
-                        .HasColumnType("int");
-
-                    b.Property<string>("Lote")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("Nombre")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("Sueros");
-                });
-
             modelBuilder.Entity("API.Domain.Models.Esquema.Vacuna", b =>
                 {
                     b.Property<int>("Id")
@@ -423,9 +401,6 @@ namespace API.Migrations
                     b.Property<int?>("CantidadUtilizadaJeringa")
                         .HasColumnType("int");
 
-                    b.Property<int?>("CantidadUtilizadaSuero")
-                        .HasColumnType("int");
-
                     b.Property<int?>("CantidadUtilizadaVacuna")
                         .HasColumnType("int");
 
@@ -438,9 +413,6 @@ namespace API.Migrations
                     b.Property<int?>("JeringaId")
                         .HasColumnType("int");
 
-                    b.Property<int?>("SueroId")
-                        .HasColumnType("int");
-
                     b.Property<int?>("VacunaId")
                         .HasColumnType("int");
 
@@ -451,8 +423,6 @@ namespace API.Migrations
                     b.HasIndex("EsquemaVacunacionId");
 
                     b.HasIndex("JeringaId");
-
-                    b.HasIndex("SueroId");
 
                     b.HasIndex("VacunaId");
 
@@ -858,10 +828,6 @@ namespace API.Migrations
                         .WithMany()
                         .HasForeignKey("JeringaId");
 
-                    b.HasOne("API.Domain.Models.Esquema.Suero", "Suero")
-                        .WithMany()
-                        .HasForeignKey("SueroId");
-
                     b.HasOne("API.Domain.Models.Esquema.Vacuna", "Vacuna")
                         .WithMany()
                         .HasForeignKey("VacunaId");
@@ -871,8 +837,6 @@ namespace API.Migrations
                     b.Navigation("EsquemaVacunacion");
 
                     b.Navigation("Jeringa");
-
-                    b.Navigation("Suero");
 
                     b.Navigation("Vacuna");
                 });

@@ -22,11 +22,6 @@ public class EsquemaVacunacionDetalle
     public Vacuna Vacuna { get; set; } // Relación con Vacuna
     public int? CantidadUtilizadaVacuna { get; set; } // Cantidad utilizada del elemento
 
-    public int? SueroId { get; set; } // Identificador del suero utilizado (opcional)
-    [ForeignKey("SueroId")]
-    [JsonIgnore]
-    public Suero Suero { get; set; } // Relación con Suero
-    public int? CantidadUtilizadaSuero { get; set; } // Cantidad utilizada del elemento
 
     public int? DiluyenteId { get; set; } // Identificador del diluyente utilizado (opcional)
     [ForeignKey("DiluyenteId")]

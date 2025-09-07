@@ -1,0 +1,67 @@
+Date : 2025-09-07 18:15:01
+Directory : c:\Users\estsb\Repos\Proyecto\BackVacunas\Migrations
+Total : 43 files,  12892 codes, 106 comments, 4418 blanks, all 17416 lines
+
+Languages
++----------+------------+------------+------------+------------+------------+
+| language | files      | code       | comment    | blank      | total      |
++----------+------------+------------+------------+------------+------------+
+| C#       |         43 |     12,892 |        106 |      4,418 |     17,416 |
++----------+------------+------------+------------+------------+------------+
+
+Directories
++----------------------------------------------------------------------------------------------------------------------------------+------------+------------+------------+------------+------------+
+| path                                                                                                                             | files      | code       | comment    | blank      | total      |
++----------------------------------------------------------------------------------------------------------------------------------+------------+------------+------------+------------+------------+
+| .                                                                                                                                |         43 |     12,892 |        106 |      4,418 |     17,416 |
++----------------------------------------------------------------------------------------------------------------------------------+------------+------------+------------+------------+------------+
+
+Files
++----------------------------------------------------------------------------------------------------------------------------------+----------+------------+------------+------------+------------+
+| filename                                                                                                                         | language | code       | comment    | blank      | total      |
++----------------------------------------------------------------------------------------------------------------------------------+----------+------------+------------+------------+------------+
+| c:\Users\estsb\Repos\Proyecto\BackVacunas\Migrations\20241128052512_AddUsuario.Designer.cs                                       | C#       |         42 |          2 |         11 |         55 |
+| c:\Users\estsb\Repos\Proyecto\BackVacunas\Migrations\20241128052512_AddUsuario.cs                                                | C#       |         30 |          3 |          4 |         37 |
+| c:\Users\estsb\Repos\Proyecto\BackVacunas\Migrations\20241128182333_EsquemaVacunacion.Designer.cs                                | C#       |        206 |          2 |         87 |        295 |
+| c:\Users\estsb\Repos\Proyecto\BackVacunas\Migrations\20241128182333_EsquemaVacunacion.cs                                         | C#       |        187 |          3 |         21 |        211 |
+| c:\Users\estsb\Repos\Proyecto\BackVacunas\Migrations\20241128211817_AddMadres.Designer.cs                                        | C#       |        160 |          2 |         58 |        220 |
+| c:\Users\estsb\Repos\Proyecto\BackVacunas\Migrations\20241128211817_AddMadres.cs                                                 | C#       |        147 |          3 |         15 |        165 |
+| c:\Users\estsb\Repos\Proyecto\BackVacunas\Migrations\20241128213937_AddCuidadores.Designer.cs                                    | C#       |        207 |          2 |         73 |        282 |
+| c:\Users\estsb\Repos\Proyecto\BackVacunas\Migrations\20241128213937_AddCuidadores.cs                                             | C#       |         38 |          3 |          4 |         45 |
+| c:\Users\estsb\Repos\Proyecto\BackVacunas\Migrations\20241202175208_ConfiguracionPaciente.Designer.cs                            | C#       |        394 |          2 |        136 |        532 |
+| c:\Users\estsb\Repos\Proyecto\BackVacunas\Migrations\20241202175208_ConfiguracionPaciente.cs                                     | C#       |        114 |          3 |          9 |        126 |
+| c:\Users\estsb\Repos\Proyecto\BackVacunas\Migrations\20241202180445_AddingAntecedentes.Designer.cs                               | C#       |        464 |          2 |        164 |        630 |
+| c:\Users\estsb\Repos\Proyecto\BackVacunas\Migrations\20241202180445_AddingAntecedentes.cs                                        | C#       |         75 |          3 |          8 |         86 |
+| c:\Users\estsb\Repos\Proyecto\BackVacunas\Migrations\20241202184844_UpdateBase.Designer.cs                                       | C#       |        558 |          2 |        204 |        764 |
+| c:\Users\estsb\Repos\Proyecto\BackVacunas\Migrations\20241202184844_UpdateBase.cs                                                | C#       |        109 |          3 |         12 |        124 |
+| c:\Users\estsb\Repos\Proyecto\BackVacunas\Migrations\20241202191004_UpdateBase1.0.Designer.cs                                    | C#       |        546 |          2 |        199 |        747 |
+| c:\Users\estsb\Repos\Proyecto\BackVacunas\Migrations\20241202191004_UpdateBase1.0.cs                                             | C#       |        129 |          3 |         26 |        158 |
+| c:\Users\estsb\Repos\Proyecto\BackVacunas\Migrations\20241202202049_UpdateBase1.1.Designer.cs                                    | C#       |        527 |          2 |        193 |        722 |
+| c:\Users\estsb\Repos\Proyecto\BackVacunas\Migrations\20241202202049_UpdateBase1.1.cs                                             | C#       |         78 |          3 |         14 |         95 |
+| c:\Users\estsb\Repos\Proyecto\BackVacunas\Migrations\20241202203754_UpdateBase1.2.Designer.cs                                    | C#       |        531 |          2 |        195 |        728 |
+| c:\Users\estsb\Repos\Proyecto\BackVacunas\Migrations\20241202203754_UpdateBase1.2.cs                                             | C#       |         44 |          3 |         10 |         57 |
+| c:\Users\estsb\Repos\Proyecto\BackVacunas\Migrations\20241202210945_UpdateBase1.3.Designer.cs                                    | C#       |        521 |          2 |        192 |        715 |
+| c:\Users\estsb\Repos\Proyecto\BackVacunas\Migrations\20241202210945_UpdateBase1.3.cs                                             | C#       |         31 |          3 |          6 |         40 |
+| c:\Users\estsb\Repos\Proyecto\BackVacunas\Migrations\20241202211807_UpdateBase1.4.Designer.cs                                    | C#       |        527 |          2 |        195 |        724 |
+| c:\Users\estsb\Repos\Proyecto\BackVacunas\Migrations\20241202211807_UpdateBase1.4.cs                                             | C#       |         55 |          3 |         12 |         70 |
+| c:\Users\estsb\Repos\Proyecto\BackVacunas\Migrations\20250427223846_AgregarAlarmasVacunacion.Designer.cs                         | C#       |        593 |          2 |        224 |        819 |
+| c:\Users\estsb\Repos\Proyecto\BackVacunas\Migrations\20250427223846_AgregarAlarmasVacunacion.cs                                  | C#       |        104 |          3 |         15 |        122 |
+| c:\Users\estsb\Repos\Proyecto\BackVacunas\Migrations\20250906232246_CreatePacientesTable.Designer.cs                             | C#       |        593 |          2 |        224 |        819 |
+| c:\Users\estsb\Repos\Proyecto\BackVacunas\Migrations\20250906232246_CreatePacientesTable.cs                                      | C#       |         14 |          3 |          6 |         23 |
+| c:\Users\estsb\Repos\Proyecto\BackVacunas\Migrations\20250907015557_RemoveIndicativoTelefono.Designer.cs                         | C#       |        590 |          2 |        223 |        815 |
+| c:\Users\estsb\Repos\Proyecto\BackVacunas\Migrations\20250907015557_RemoveIndicativoTelefono.cs                                  | C#       |         55 |          3 |          8 |         66 |
+| c:\Users\estsb\Repos\Proyecto\BackVacunas\Migrations\20250907025808_AgregarSistemaAlertasVacunacion.Designer.cs                  | C#       |        743 |          2 |        281 |      1,026 |
+| c:\Users\estsb\Repos\Proyecto\BackVacunas\Migrations\20250907025808_AgregarSistemaAlertasVacunacion.cs                           | C#       |        194 |          3 |         29 |        226 |
+| c:\Users\estsb\Repos\Proyecto\BackVacunas\Migrations\20250907043801_UpdateVacunaIntervaloSemanas.Designer.cs                     | C#       |        677 |          2 |        257 |        936 |
+| c:\Users\estsb\Repos\Proyecto\BackVacunas\Migrations\20250907043801_UpdateVacunaIntervaloSemanas.cs                              | C#       |         70 |          3 |          8 |         81 |
+| c:\Users\estsb\Repos\Proyecto\BackVacunas\Migrations\20250907050855_UpdatePacienteRemoveGeneroMakeLugarPartoOptional.Designer.cs | C#       |        673 |          2 |        256 |        931 |
+| c:\Users\estsb\Repos\Proyecto\BackVacunas\Migrations\20250907050855_UpdatePacienteRemoveGeneroMakeLugarPartoOptional.cs          | C#       |         43 |          3 |          6 |         52 |
+| c:\Users\estsb\Repos\Proyecto\BackVacunas\Migrations\20250907214907_RefactorEsquemaVacunacion.Designer.cs                        | C#       |        674 |          2 |        256 |        932 |
+| c:\Users\estsb\Repos\Proyecto\BackVacunas\Migrations\20250907214907_RefactorEsquemaVacunacion.cs                                 | C#       |        110 |          3 |         24 |        137 |
+| c:\Users\estsb\Repos\Proyecto\BackVacunas\Migrations\20250907225505_RemoveSueroFromDetalle.Designer.cs                           | C#       |        665 |          2 |        251 |        918 |
+| c:\Users\estsb\Repos\Proyecto\BackVacunas\Migrations\20250907225505_RemoveSueroFromDetalle.cs                                    | C#       |         46 |          3 |         10 |         59 |
+| c:\Users\estsb\Repos\Proyecto\BackVacunas\Migrations\20250907230138_RemoveSueroEntity.Designer.cs                                | C#       |        650 |          2 |        244 |        896 |
+| c:\Users\estsb\Repos\Proyecto\BackVacunas\Migrations\20250907230138_RemoveSueroEntity.cs                                         | C#       |         30 |          3 |          4 |         37 |
+| c:\Users\estsb\Repos\Proyecto\BackVacunas\Migrations\AplicationDbContextModelSnapshot.cs                                         | C#       |        648 |          1 |        244 |        893 |
+| Total                                                                                                                            |          |     12,892 |        106 |      4,418 |     17,416 |
++----------------------------------------------------------------------------------------------------------------------------------+----------+------------+------------+------------+------------+

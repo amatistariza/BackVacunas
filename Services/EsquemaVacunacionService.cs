@@ -8,7 +8,6 @@ public class EsquemaVacunacionService : IEsquemaVacunacionService
 {
     private readonly IEsquemaVacunacionRepository _esquemaRepository;
     private readonly IVacunaRepository _vacunaRepository;
-    private readonly ISueroRepository _sueroRepository;
     private readonly IDiluyenteRepository _diluyenteRepository;
     private readonly IJeringaRepository _jeringaRepository;
     private readonly IPacienteRepository _pacienteRepository;
@@ -17,7 +16,6 @@ public class EsquemaVacunacionService : IEsquemaVacunacionService
     public EsquemaVacunacionService(
         IEsquemaVacunacionRepository esquemaRepository,
         IVacunaRepository vacunaRepository,
-        ISueroRepository sueroRepository,
         IDiluyenteRepository diluyenteRepository,
         IJeringaRepository jeringaRepository,
     IPacienteRepository pacienteRepository,
@@ -25,7 +23,6 @@ public class EsquemaVacunacionService : IEsquemaVacunacionService
     {
         _esquemaRepository = esquemaRepository;
         _vacunaRepository = vacunaRepository;
-        _sueroRepository = sueroRepository;
         _diluyenteRepository = diluyenteRepository;
         _jeringaRepository = jeringaRepository;
         _pacienteRepository = pacienteRepository;
@@ -78,12 +75,7 @@ public class EsquemaVacunacionService : IEsquemaVacunacionService
                 if (vac == null) throw new InvalidOperationException($"Vacuna detalle Id {detalle.VacunaId.Value} no existe.");
                 await _vacunaRepository.DescontarInventarioAsync(detalle.VacunaId.Value, detalle.CantidadUtilizadaVacuna ?? 0);
             }
-            if (detalle.SueroId.HasValue)
-            {
-                var suero = await _sueroRepository.GetByIdAsync(detalle.SueroId.Value);
-                if (suero == null) throw new InvalidOperationException($"SueroId {detalle.SueroId.Value} no existe.");
-                await _sueroRepository.DescontarInventarioAsync(detalle.SueroId.Value, detalle.CantidadUtilizadaSuero ?? 0);
-            }
+            // Suero eliminado (equivalente a diluyente) – lógica removida
             if (detalle.DiluyenteId.HasValue)
             {
                 var dil = await _diluyenteRepository.GetByIdAsync(detalle.DiluyenteId.Value);
@@ -108,7 +100,9 @@ public class EsquemaVacunacionService : IEsquemaVacunacionService
             esquemaVacunacion.FechaProximaDosis = null;
         }
 
-        await _esquemaRepository.AddAsync(esquemaVacunacion);
+    // Asignar fecha actual si no viene seteada (o si se decide ignorar input del cliente)
+    esquemaVacunacion.FechaDosisAplicada = DateTime.UtcNow;
+    await _esquemaRepository.AddAsync(esquemaVacunacion);
 
         // Crear alarma sólo si hay próxima dosis
         if (esquemaVacunacion.FechaProximaDosis.HasValue)
@@ -124,5 +118,54 @@ public class EsquemaVacunacionService : IEsquemaVacunacionService
     public async Task<EsquemaVacunacion> GetEsquemaConDetallesAsync(int esquemaId)
     {
         return await _esquemaRepository.GetEsquemaConDetallesAsync(esquemaId);
+    }
+
+    public async Task<(bool aplica, int numeroDosis, string mensaje)> ValidarAplicacionDosisAsync(int pacienteId, int vacunaId)
+    {
+        // Obtener vacuna para reglas
+        var vacuna = await _vacunaRepository.GetByIdAsync(vacunaId);
+        if (vacuna == null)
+            return (false, 0, "Vacuna no existe");
+
+        // Traer último esquema registrado para ese paciente y vacuna
+        var contextField = _esquemaRepository.GetType().GetField("_context", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
+        var dbContext = contextField?.GetValue(_esquemaRepository) as API.Persistence.Context.AplicationDbContext;
+        EsquemaVacunacion ultimo = null;
+        if (dbContext != null)
+        {
+            ultimo = dbContext.EsquemasVacunacion
+                .Where(e => e.PacienteId == pacienteId && e.VacunaId == vacunaId)
+                .OrderByDescending(e => e.FechaDosisAplicada)
+                .FirstOrDefault();
+        }
+
+        // Si no hay registros todavía → primera dosis aplica inmediatamente
+        if (ultimo == null)
+        {
+            return (true, 1, "Puede aplicarse la primera dosis");
+        }
+
+        // Si ya completó todas las dosis
+        if (ultimo.NumeroDeDosis >= vacuna.NumeroDosis)
+        {
+            return (false, ultimo.NumeroDeDosis, "Esquema de vacunación finalizado");
+        }
+
+        // Calcular fecha próxima esperada (si no se guardó ya)
+        var fechaProxima = ultimo.FechaProximaDosis;
+        if (!fechaProxima.HasValue)
+        {
+            fechaProxima = ultimo.FechaDosisAplicada.AddDays(vacuna.IntervaloSemanas * 7);
+        }
+
+        var hoy = DateTime.UtcNow.Date;
+        if (hoy < fechaProxima.Value.Date)
+        {
+            var faltan = (fechaProxima.Value.Date - hoy).Days;
+            return (false, ultimo.NumeroDeDosis + 1, $"Todavía no corresponde. Faltan {faltan} día(s) para la siguiente dosis");
+        }
+
+        // Es el día o ya pasó la fecha → puede aplicarse siguiente dosis
+        return (true, ultimo.NumeroDeDosis + 1, $"Debe aplicarse la dosis número {ultimo.NumeroDeDosis + 1}");
     }
 }

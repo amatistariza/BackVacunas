@@ -30,7 +30,6 @@ if (das == 1)
     builder.Services.AddScoped<IVacunaService, VacunaService>();
     builder.Services.AddScoped<IJeringaService, JeringaService>();
     builder.Services.AddScoped<IDiluyenteService, DiluyenteService>();
-    builder.Services.AddScoped<ISueroService, SueroService>();
     builder.Services.AddScoped<IMadreService, MadreService>();
     builder.Services.AddScoped<ICuidadorService, CuidadorService>();
     builder.Services.AddScoped<IAntecedenteService, AntecedenteService>();
@@ -46,7 +45,6 @@ if (das == 1)
     builder.Services.AddScoped<IVacunaRepository, VacunaRepository>();
     builder.Services.AddScoped<IJeringaRepository, JeringaRepository>();
     builder.Services.AddScoped<IDiluyenteRepository, DiluyenteRepository>();
-    builder.Services.AddScoped<ISueroRepository, SueroRepository>();
     builder.Services.AddScoped<IMadreRepository, MadreRepository>();
     builder.Services.AddScoped<ICuidadorRepository, CuidadorRepository>();
     builder.Services.AddScoped<IAntecedenteRepository, AntecedenteRepository>();
@@ -59,7 +57,6 @@ if (das == 1)
     builder.Services.AddScoped<IRepository<Vacuna>, VacunaRepository>();
     builder.Services.AddScoped<IRepository<Jeringa>, JeringaRepository>();
     builder.Services.AddScoped<IRepository<Diluyente>, DiluyenteRepository>();
-    builder.Services.AddScoped<IRepository<Suero>, SueroRepository>();
     builder.Services.AddScoped<IRepository<Madre>, MadreRepository>();
     builder.Services.AddScoped<IRepository<Cuidador>, CuidadorRepository>();
     builder.Services.AddScoped<IRepository<Antecedente>, AntecedenteRepository>();
@@ -72,7 +69,6 @@ if (das == 1)
     builder.Services.AddScoped<IBaseService<Vacuna>, VacunaService>();
     builder.Services.AddScoped<IBaseService<Jeringa>, JeringaService>();
     builder.Services.AddScoped<IBaseService<Diluyente>, DiluyenteService>();
-    builder.Services.AddScoped<IBaseService<Suero>, SueroService>();
     builder.Services.AddScoped<IBaseService<Madre>, MadreService>();
     builder.Services.AddScoped<IBaseService<Cuidador>, CuidadorService>();
     builder.Services.AddScoped<IBaseService<Antecedente>, AntecedenteService>();

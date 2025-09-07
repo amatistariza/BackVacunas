@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace API.Migrations
 {
     [DbContext(typeof(AplicationDbContext))]
-    [Migration("20241202211807_UpdateBase1.4")]
-    partial class UpdateBase14
+    [Migration("20250907231552_Initial")]
+    partial class Initial
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -24,6 +24,59 @@ namespace API.Migrations
                 .HasAnnotation("Relational:MaxIdentifierLength", 128);
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
+
+            modelBuilder.Entity("API.Domain.Models.AlarmaVacunacion", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("DosisActual")
+                        .HasColumnType("int");
+
+                    b.Property<bool>("EsquemaCompletado")
+                        .HasColumnType("bit");
+
+                    b.Property<int?>("EsquemaVacunacionDetalleId")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime?>("FechaNotificacion")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime>("FechaPrimeraAplicacion")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime>("FechaProximaAplicacion")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime>("FechaUltimaAplicacion")
+                        .HasColumnType("datetime2");
+
+                    b.Property<bool>("NotificacionEnviada")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("Observaciones")
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
+                    b.Property<int>("PacienteId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("VacunaId")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("EsquemaVacunacionDetalleId");
+
+                    b.HasIndex("PacienteId");
+
+                    b.HasIndex("VacunaId");
+
+                    b.ToTable("AlarmasVacunacion");
+                });
 
             modelBuilder.Entity("API.Domain.Models.Antecedente", b =>
                 {
@@ -238,28 +291,6 @@ namespace API.Migrations
                     b.ToTable("Jeringas");
                 });
 
-            modelBuilder.Entity("API.Domain.Models.Esquema.Suero", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<int>("FrascosDisponibles")
-                        .HasColumnType("int");
-
-                    b.Property<string>("Lote")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("Nombre")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("Sueros");
-                });
-
             modelBuilder.Entity("API.Domain.Models.Esquema.Vacuna", b =>
                 {
                     b.Property<int>("Id")
@@ -274,6 +305,9 @@ namespace API.Migrations
                     b.Property<DateTime>("FechaRegistro")
                         .HasColumnType("datetime2");
 
+                    b.Property<int>("IntervaloSemanas")
+                        .HasColumnType("int");
+
                     b.Property<string>("Laboratorio")
                         .HasColumnType("nvarchar(max)");
 
@@ -282,6 +316,9 @@ namespace API.Migrations
 
                     b.Property<string>("Nombre")
                         .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("NumeroDosis")
+                        .HasColumnType("int");
 
                     b.HasKey("Id");
 
@@ -296,9 +333,22 @@ namespace API.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<string>("MotivoNoIngreso")
+                    b.Property<DateTime>("FechaDosisAplicada")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime?>("FechaProximaDosis")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Lote")
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<string>("MotivoIngreso")
                         .HasMaxLength(500)
                         .HasColumnType("nvarchar(500)");
+
+                    b.Property<int>("NumeroDeDosis")
+                        .HasColumnType("int");
 
                     b.Property<string>("Observaciones")
                         .HasMaxLength(500)
@@ -315,12 +365,27 @@ namespace API.Migrations
                         .HasMaxLength(100)
                         .HasColumnType("nvarchar(100)");
 
+                    b.Property<string>("SitioDeAplicacion")
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
                     b.Property<string>("TipoCarnet")
                         .IsRequired()
                         .HasMaxLength(50)
                         .HasColumnType("nvarchar(50)");
 
+                    b.Property<int>("VacunaId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("ViaDeAdministracion")
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
                     b.HasKey("Id");
+
+                    b.HasIndex("PacienteId");
+
+                    b.HasIndex("VacunaId");
 
                     b.ToTable("EsquemasVacunacion");
                 });
@@ -339,9 +404,6 @@ namespace API.Migrations
                     b.Property<int?>("CantidadUtilizadaJeringa")
                         .HasColumnType("int");
 
-                    b.Property<int?>("CantidadUtilizadaSuero")
-                        .HasColumnType("int");
-
                     b.Property<int?>("CantidadUtilizadaVacuna")
                         .HasColumnType("int");
 
@@ -354,9 +416,6 @@ namespace API.Migrations
                     b.Property<int?>("JeringaId")
                         .HasColumnType("int");
 
-                    b.Property<int?>("SueroId")
-                        .HasColumnType("int");
-
                     b.Property<int?>("VacunaId")
                         .HasColumnType("int");
 
@@ -367,8 +426,6 @@ namespace API.Migrations
                     b.HasIndex("EsquemaVacunacionId");
 
                     b.HasIndex("JeringaId");
-
-                    b.HasIndex("SueroId");
 
                     b.HasIndex("VacunaId");
 
@@ -477,7 +534,7 @@ namespace API.Migrations
                         .HasMaxLength(50)
                         .HasColumnType("nvarchar(50)");
 
-                    b.Property<int>("CuidadorId")
+                    b.Property<int?>("CuidadorId")
                         .HasColumnType("int");
 
                     b.Property<string>("DepartamentoResidencia")
@@ -521,20 +578,11 @@ namespace API.Migrations
                     b.Property<DateTime>("FechaNacimiento")
                         .HasColumnType("datetime2");
 
-                    b.Property<string>("Genero")
-                        .HasMaxLength(20)
-                        .HasColumnType("nvarchar(20)");
-
-                    b.Property<string>("IndicativoTelefono")
-                        .HasMaxLength(10)
-                        .HasColumnType("nvarchar(10)");
-
                     b.Property<string>("LugarAtencionParto")
-                        .IsRequired()
                         .HasMaxLength(100)
                         .HasColumnType("nvarchar(100)");
 
-                    b.Property<int>("MadreId")
+                    b.Property<int?>("MadreId")
                         .HasColumnType("int");
 
                     b.Property<string>("MunicipioResidencia")
@@ -611,6 +659,60 @@ namespace API.Migrations
                     b.ToTable("Pacientes", (string)null);
                 });
 
+            modelBuilder.Entity("API.Domain.Models.RegistroVacunacion", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("EsquemaVacunacionId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("EstadoRegistro")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
+
+                    b.Property<DateTime>("FechaAplicacion")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime?>("FechaProximaDosis")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime>("FechaRegistro")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int>("NumeroDosis")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Observaciones")
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
+                    b.Property<int>("PacienteId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("UsuarioRegistro")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<int>("VacunaId")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("EsquemaVacunacionId");
+
+                    b.HasIndex("PacienteId");
+
+                    b.HasIndex("VacunaId");
+
+                    b.ToTable("RegistrosVacunacion");
+                });
+
             modelBuilder.Entity("API.Domain.Models.Usuario", b =>
                 {
                     b.Property<int>("Id")
@@ -634,6 +736,31 @@ namespace API.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("Usuarios");
+                });
+
+            modelBuilder.Entity("API.Domain.Models.AlarmaVacunacion", b =>
+                {
+                    b.HasOne("API.Domain.Models.EsquemaVacunacionDetalle", "EsquemaVacunacionDetalle")
+                        .WithMany("Alarmas")
+                        .HasForeignKey("EsquemaVacunacionDetalleId");
+
+                    b.HasOne("API.Domain.Models.Paciente", "Paciente")
+                        .WithMany()
+                        .HasForeignKey("PacienteId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("API.Domain.Models.Esquema.Vacuna", "Vacuna")
+                        .WithMany()
+                        .HasForeignKey("VacunaId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("EsquemaVacunacionDetalle");
+
+                    b.Navigation("Paciente");
+
+                    b.Navigation("Vacuna");
                 });
 
             modelBuilder.Entity("API.Domain.Models.Antecedente", b =>
@@ -669,6 +796,25 @@ namespace API.Migrations
                     b.Navigation("Paciente");
                 });
 
+            modelBuilder.Entity("API.Domain.Models.EsquemaVacunacion", b =>
+                {
+                    b.HasOne("API.Domain.Models.Paciente", "Paciente")
+                        .WithMany()
+                        .HasForeignKey("PacienteId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("API.Domain.Models.Esquema.Vacuna", "Vacuna")
+                        .WithMany()
+                        .HasForeignKey("VacunaId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("Paciente");
+
+                    b.Navigation("Vacuna");
+                });
+
             modelBuilder.Entity("API.Domain.Models.EsquemaVacunacionDetalle", b =>
                 {
                     b.HasOne("API.Domain.Models.Esquema.Diluyente", "Diluyente")
@@ -685,10 +831,6 @@ namespace API.Migrations
                         .WithMany()
                         .HasForeignKey("JeringaId");
 
-                    b.HasOne("API.Domain.Models.Esquema.Suero", "Suero")
-                        .WithMany()
-                        .HasForeignKey("SueroId");
-
                     b.HasOne("API.Domain.Models.Esquema.Vacuna", "Vacuna")
                         .WithMany()
                         .HasForeignKey("VacunaId");
@@ -699,7 +841,32 @@ namespace API.Migrations
 
                     b.Navigation("Jeringa");
 
-                    b.Navigation("Suero");
+                    b.Navigation("Vacuna");
+                });
+
+            modelBuilder.Entity("API.Domain.Models.RegistroVacunacion", b =>
+                {
+                    b.HasOne("API.Domain.Models.EsquemaVacunacion", "EsquemaVacunacion")
+                        .WithMany()
+                        .HasForeignKey("EsquemaVacunacionId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("API.Domain.Models.Paciente", "Paciente")
+                        .WithMany()
+                        .HasForeignKey("PacienteId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("API.Domain.Models.Esquema.Vacuna", "Vacuna")
+                        .WithMany()
+                        .HasForeignKey("VacunaId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("EsquemaVacunacion");
+
+                    b.Navigation("Paciente");
 
                     b.Navigation("Vacuna");
                 });
@@ -707,6 +874,11 @@ namespace API.Migrations
             modelBuilder.Entity("API.Domain.Models.EsquemaVacunacion", b =>
                 {
                     b.Navigation("Detalles");
+                });
+
+            modelBuilder.Entity("API.Domain.Models.EsquemaVacunacionDetalle", b =>
+                {
+                    b.Navigation("Alarmas");
                 });
 
             modelBuilder.Entity("API.Domain.Models.Paciente", b =>

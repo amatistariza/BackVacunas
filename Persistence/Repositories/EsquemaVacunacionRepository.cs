@@ -17,8 +17,6 @@ namespace API.Persistence.Repositories
                 .Include(e => e.Detalles)
                     .ThenInclude(d => d.Vacuna)
                 .Include(e => e.Detalles)
-                    .ThenInclude(d => d.Suero)
-                .Include(e => e.Detalles)
                     .ThenInclude(d => d.Diluyente)
                 .Include(e => e.Detalles)
                     .ThenInclude(d => d.Jeringa)

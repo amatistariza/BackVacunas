@@ -12,7 +12,7 @@ public class EsquemaVacunacionCreateDTO
     [Required] public int PacienteId { get; set; }
     [Required] public int VacunaId { get; set; }
     [Required] public int NumeroDeDosis { get; set; }
-    [Required] public DateTime FechaDosisAplicada { get; set; }
+    // Fecha se asignará automáticamente en el servidor
     public string ViaDeAdministracion { get; set; }
     public string SitioDeAplicacion { get; set; }
     public string Lote { get; set; }
@@ -24,8 +24,6 @@ public class EsquemaVacunacionDetalleCreateDTO
 {
     public int? VacunaId { get; set; }
     public int? CantidadUtilizadaVacuna { get; set; }
-    public int? SueroId { get; set; }
-    public int? CantidadUtilizadaSuero { get; set; }
     public int? DiluyenteId { get; set; }
     public int? CantidadUtilizadaDiluyente { get; set; }
     public int? JeringaId { get; set; }

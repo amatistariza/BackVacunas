@@ -29,4 +29,10 @@
     <None Include="Rotativa\.vs\wkhtmltoimage\v16\.suo" />
   </ItemGroup>
 
+  <!-- Excluir archivos del proyecto de pruebas del build de la API -->
+  <ItemGroup>
+    <Compile Remove="BackVacunas.Tests/**/*.cs" />
+    <None Include="BackVacunas.Tests/**/*.cs" />
+  </ItemGroup>
+
 </Project>

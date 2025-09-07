@@ -20,7 +20,6 @@ DELETE FROM Cuidadores;
 DELETE FROM Vacunas;
 DELETE FROM Jeringas;
 DELETE FROM Diluyentes;
-DELETE FROM Sueros;
 DELETE FROM Usuarios;
 
 PRINT 'Reactivando FKs';
@@ -50,10 +49,6 @@ INSERT INTO Diluyentes (Nombre,Lote,CantidadDisponible) VALUES
 ('Cloruro Sodio 0.9%','DIL-001',300),
 ('Agua Bacteriostatica','DIL-002',200);
 
-PRINT 'Insertando Sueros';
-INSERT INTO Sueros (Nombre,Lote,FrascosDisponibles) VALUES
-('Antirrabico Humano','SR-001',100),
-('Inmunoglobulina Tetanica','SR-002',60);
 
 PRINT 'Insertando Madre y Cuidador';
 INSERT INTO Madres (TipoIdentificacion,NumeroIdentificacion,PrimerNombre,PrimerApellido,CorreoElectronico,RegimenAfiliacion,PertenenciaEtnica,Desplazado)

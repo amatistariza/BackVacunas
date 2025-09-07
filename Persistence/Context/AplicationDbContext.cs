@@ -10,7 +10,6 @@ public class AplicationDbContext : DbContext
     public DbSet<Vacuna> Vacunas { get; set; }
     public DbSet<Jeringa> Jeringas { get; set; }
     public DbSet<Diluyente> Diluyentes { get; set; }
-    public DbSet<Suero> Sueros { get; set; }
     public DbSet<Madre> Madres { get; set; }
     public DbSet<Cuidador> Cuidadores { get; set; }
     public DbSet<Antecedente> Antecedentes { get; set; }
@@ -119,10 +118,6 @@ public class AplicationDbContext : DbContext
     //        .WithMany()
     //        .HasForeignKey(va => va.DiluyenteId);
 
-    //    modelBuilder.Entity<VacunaAdministrada>()
-    //        .HasOne(va => va.Suero)
-    //        .WithMany()
-    //        .HasForeignKey(va => va.SueroId);
 
     //    modelBuilder.Entity<VacunaAdministrada>()
     //        .HasOne(va => va.TipoDosis)

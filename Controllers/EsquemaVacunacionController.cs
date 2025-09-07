@@ -31,7 +31,7 @@ public class EsquemaVacunacionController : ControllerBase
                 PacienteId = dto.PacienteId,
                 VacunaId = dto.VacunaId,
                 NumeroDeDosis = dto.NumeroDeDosis,
-                FechaDosisAplicada = dto.FechaDosisAplicada,
+                // Fecha se establecerá en el servicio con DateTime.UtcNow
                 ViaDeAdministracion = dto.ViaDeAdministracion,
                 SitioDeAplicacion = dto.SitioDeAplicacion,
                 Lote = dto.Lote,
@@ -39,8 +39,6 @@ public class EsquemaVacunacionController : ControllerBase
                 {
                     VacunaId = d.VacunaId,
                     CantidadUtilizadaVacuna = d.CantidadUtilizadaVacuna,
-                    SueroId = d.SueroId,
-                    CantidadUtilizadaSuero = d.CantidadUtilizadaSuero,
                     DiluyenteId = d.DiluyenteId,
                     CantidadUtilizadaDiluyente = d.CantidadUtilizadaDiluyente,
                     JeringaId = d.JeringaId,
@@ -106,7 +104,6 @@ public class EsquemaVacunacionController : ControllerBase
                     d.Id,
                     d.VacunaId,
                     d.CantidadUtilizadaVacuna,
-                    d.SueroId,
                     d.DiluyenteId,
                     d.JeringaId
                 })
@@ -117,6 +114,22 @@ public class EsquemaVacunacionController : ControllerBase
         {
             var inner = ex.InnerException?.Message;
             return StatusCode(500, new { mensaje = "Error inesperado.", error = ex.Message, inner });
+        }
+    }
+
+    [HttpGet("validar")]
+    public async Task<IActionResult> ValidarAplicacion([FromQuery] int pacienteId, [FromQuery] int vacunaId)
+    {
+        if (pacienteId <= 0 || vacunaId <= 0)
+            return BadRequest(new { mensaje = "Parámetros inválidos" });
+        try
+        {
+            var (aplica, numeroDosis, mensaje) = await _esquemaService.ValidarAplicacionDosisAsync(pacienteId, vacunaId);
+            return Ok(new { aplica, numeroDosis, mensaje });
+        }
+        catch (Exception ex)
+        {
+            return StatusCode(500, new { mensaje = "Error validando la dosis", error = ex.Message, inner = ex.InnerException?.Message });
         }
     }
 }
