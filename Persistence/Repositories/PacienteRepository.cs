@@ -40,7 +40,6 @@ namespace API.Persistence.Repositories
                     EdadGestacionalSemanas = e.EdadGestacionalSemanas,
                     PaisNacimiento = e.PaisNacimiento,
                     EstatusMigratorio = e.EstatusMigratorio,
-                    LugarAtencionParto = e.LugarAtencionParto,
                     RegimenAfiliacion = e.RegimenAfiliacion,
                     Aseguradora = e.Aseguradora,
                     PertenenciaEtnica = e.PertenenciaEtnica,

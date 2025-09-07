@@ -56,8 +56,6 @@ public class Paciente
     [StringLength(50)]
     public string EstatusMigratorio { get; set; } // Estatus migratorio (obligatorio)
 
-    [StringLength(100)]
-    public string LugarAtencionParto { get; set; } // Lugar de atención del parto (hospital, opcional)
 
     [Required]
     [StringLength(50)]

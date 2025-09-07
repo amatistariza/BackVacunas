@@ -58,8 +58,6 @@ namespace API.Domain.DTOs
         [StringLength(50)]
         public string EstatusMigratorio { get; set; }
 
-    [StringLength(100)]
-    public string LugarAtencionParto { get; set; }
 
         [Required]
         [StringLength(50)]

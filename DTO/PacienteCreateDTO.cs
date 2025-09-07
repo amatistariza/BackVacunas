@@ -91,8 +91,6 @@ namespace API.DTO
 
         public DateTime FechaAtencion { get; set; }
 
-        [StringLength(100)]
-        public string LugarAtencionParto { get; set; }
 
         public int EdadGestacionalSemanas { get; set; }
 
