@@ -107,8 +107,15 @@ if (das == 1)
     });
 
     // Configuración de controladores y serialización JSON
-    builder.Services.AddControllers().AddNewtonsoftJson(options =>
-        options.SerializerSettings.ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore);
+    builder.Services.AddControllers()
+        .AddNewtonsoftJson(options =>
+            options.SerializerSettings.ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore)
+        .AddJsonOptions(o =>
+        {
+            // Conversores para formatear fechas DateTime como yyyy-MM-dd (solo fecha)
+            o.JsonSerializerOptions.Converters.Add(new Utils.Json.DateOnlyConverter());
+            o.JsonSerializerOptions.Converters.Add(new Utils.Json.NullableDateOnlyConverter());
+        });
 
     // Configuración de Swagger
     builder.Services.AddEndpointsApiExplorer();

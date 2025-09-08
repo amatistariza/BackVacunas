@@ -67,7 +67,10 @@ public class EsquemaVacunacionService : IEsquemaVacunacionService
 
     private async Task ProcesarDetallesYGuardar(EsquemaVacunacion esquemaVacunacion)
     {
-    foreach (var detalle in esquemaVacunacion.Detalles)
+        // Normalizar fecha de aplicación (solo fecha, sin hora) ANTES de calcular próxima dosis
+        esquemaVacunacion.FechaDosisAplicada = DateTime.UtcNow.Date;
+
+        foreach (var detalle in esquemaVacunacion.Detalles)
         {
             if (detalle.VacunaId.HasValue)
             {
@@ -89,20 +92,19 @@ public class EsquemaVacunacionService : IEsquemaVacunacionService
                 await _jeringaRepository.DescontarInventarioAsync(detalle.JeringaId.Value, detalle.CantidadUtilizadaJeringa ?? 0);
             }
         }
-        // Calcular FechaProximaDosis si no es última dosis
+        // Calcular FechaProximaDosis usando solo componente fecha (si quedan dosis)
         var vacuna = await _vacunaRepository.GetByIdAsync(esquemaVacunacion.VacunaId);
         if (vacuna != null && esquemaVacunacion.NumeroDeDosis < vacuna.NumeroDosis)
         {
-            esquemaVacunacion.FechaProximaDosis = esquemaVacunacion.FechaDosisAplicada.AddDays(vacuna.IntervaloSemanas * 7);
+            var baseDate = esquemaVacunacion.FechaDosisAplicada.Date; // asegurar solo fecha
+            esquemaVacunacion.FechaProximaDosis = baseDate.AddDays(vacuna.IntervaloSemanas * 7).Date;
         }
         else
         {
             esquemaVacunacion.FechaProximaDosis = null;
         }
 
-    // Asignar fecha actual si no viene seteada (o si se decide ignorar input del cliente)
-    esquemaVacunacion.FechaDosisAplicada = DateTime.UtcNow;
-    await _esquemaRepository.AddAsync(esquemaVacunacion);
+        await _esquemaRepository.AddAsync(esquemaVacunacion);
 
         // Crear alarma sólo si hay próxima dosis
         if (esquemaVacunacion.FechaProximaDosis.HasValue)
@@ -155,7 +157,7 @@ public class EsquemaVacunacionService : IEsquemaVacunacionService
         var fechaProxima = ultimo.FechaProximaDosis;
         if (!fechaProxima.HasValue)
         {
-            fechaProxima = ultimo.FechaDosisAplicada.AddDays(vacuna.IntervaloSemanas * 7);
+            fechaProxima = ultimo.FechaDosisAplicada.Date.AddDays(vacuna.IntervaloSemanas * 7).Date;
         }
 
         var hoy = DateTime.UtcNow.Date;
