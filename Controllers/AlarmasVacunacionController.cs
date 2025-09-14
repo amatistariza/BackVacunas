@@ -27,6 +27,7 @@ namespace API.Controllers
 
                 var data = alarmas.Select(a => new API.DTO.AlarmaProximaDto
                 {
+                    Id = a.Id,
                     TipoIdentificacion = a.Paciente?.TipoIdentificacion ?? string.Empty,
                     NumeroIdentificacion = a.Paciente?.NumeroIdentificacion ?? string.Empty,
                     Nombre = string.Join(" ", new[] { a.Paciente?.PrimerNombre, a.Paciente?.SegundoNombre, a.Paciente?.PrimerApellido, a.Paciente?.SegundoApellido }.Where(s => !string.IsNullOrWhiteSpace(s))),

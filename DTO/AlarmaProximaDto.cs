@@ -5,6 +5,9 @@ namespace API.DTO;
 
 public class AlarmaProximaDto
 {
+    [JsonProperty("id")]
+    public int Id { get; set; }
+
     [JsonProperty("tipoIdentificacion")]
     public string TipoIdentificacion { get; set; } = string.Empty;
 
