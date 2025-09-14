@@ -1,28 +1,28 @@
 using System;
-using System.Text.Json.Serialization;
+using Newtonsoft.Json;
 
 namespace API.DTO;
 
 public class NurseDashboardStatisticsDto
 {
-    [JsonPropertyName("ultimaActualizacion")]
+    [JsonProperty("ultimaActualizacion")]
     public DateTime LastUpdated { get; set; }
 
-    [JsonPropertyName("totalDosisVacunas")]
+    [JsonProperty("totalDosisVacunas")]
     public int TotalVaccineDoses { get; set; }
 
-    [JsonPropertyName("totalJeringas")]
+    [JsonProperty("totalJeringas")]
     public int TotalSyringes { get; set; }
 
-    [JsonPropertyName("totalDiluyentes")]
+    [JsonProperty("totalDiluyentes")]
     public int TotalDiluents { get; set; }
 
-    [JsonPropertyName("aplicacionesHoy")]
+    [JsonProperty("aplicacionesHoy")]
     public int ApplicationsToday { get; set; }
 
-    [JsonPropertyName("aplicacionesSemana")]
+    [JsonProperty("aplicacionesSemana")]
     public int ApplicationsThisWeek { get; set; }
 
-    [JsonPropertyName("bajoStock")]
+    [JsonProperty("bajoStock")]
     public LowStockSummaryDto LowStock { get; set; } = new LowStockSummaryDto();
 }

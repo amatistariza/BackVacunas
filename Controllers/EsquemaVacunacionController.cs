@@ -17,11 +17,11 @@ public class EsquemaVacunacionController : ControllerBase
 
     // GET: api/esquemavacunacion
     [HttpGet]
-    public async Task<IActionResult> ListarEsquemas()
+    public async Task<IActionResult> ListarEsquemas([FromQuery] string identificacion = null)
     {
         try
         {
-            var lista = await _esquemaService.ListarEsquemasAsync();
+            var lista = await _esquemaService.ListarEsquemasAsync(identificacion);
             return Ok(lista);
         }
         catch (Exception ex)

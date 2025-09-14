@@ -6,7 +6,7 @@ using Microsoft.AspNetCore.Mvc;
 namespace API.Controllers;
 
 [ApiController]
-[Route("api/[controller]")]
+[Route("api/estadisticas")]
 public class StatisticsController : ControllerBase
 {
     private readonly IStatisticsService _statisticsService;
@@ -17,7 +17,7 @@ public class StatisticsController : ControllerBase
     }
 
     // GET: api/statistics/nurse-dashboard
-    [HttpGet("nurse-dashboard")]
+    [HttpGet("panel-enfermeria")]
     [ProducesResponseType(typeof(NurseDashboardStatisticsDto), 200)]
     public async Task<ActionResult<NurseDashboardStatisticsDto>> GetNurseDashboard([FromQuery] int lowStockThreshold = 10)
     {

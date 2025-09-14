@@ -1,15 +1,15 @@
-using System.Text.Json.Serialization;
+using Newtonsoft.Json;
 
 namespace API.DTO;
 
 public class LowStockSummaryDto
 {
-    [JsonPropertyName("umbral")]
+    [JsonProperty("umbral")]
     public int Threshold { get; set; }
 
-    [JsonPropertyName("vacunasBajoUmbral")]
+    [JsonProperty("vacunasBajoUmbral")]
     public int VaccinesBelowThreshold { get; set; }
 
-    [JsonPropertyName("jeringasBajoUmbral")]
+    [JsonProperty("jeringasBajoUmbral")]
     public int SyringesBelowThreshold { get; set; }
 }
