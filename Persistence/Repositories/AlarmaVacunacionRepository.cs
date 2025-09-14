@@ -1,3 +1,4 @@
+#nullable enable annotations
 using API.Domain.IRepositories;
 using API.Domain.Models;
 using API.Persistence.Context;
@@ -16,14 +17,15 @@ namespace API.Persistence.Repositories
         /// </summary>
         public async Task<IEnumerable<AlarmaVacunacion>> GetVacunacionesProximasMesActualAsync()
         {
-            var inicioMes = new DateTime(DateTime.Now.Year, DateTime.Now.Month, 1);
-            var finMes = inicioMes.AddMonths(1).AddDays(-1);
+            var hoy = DateTime.Today;
+            var inicioMes = new DateTime(hoy.Year, hoy.Month, 1);
+            var inicioMesSiguiente = inicioMes.AddMonths(1);
 
             return await _context.AlarmasVacunacion
                 .Include(a => a.Paciente)
                 .Include(a => a.Vacuna)
                 .Where(a => a.FechaProximaAplicacion >= inicioMes && 
-                           a.FechaProximaAplicacion <= finMes &&
+                           a.FechaProximaAplicacion < inicioMesSiguiente &&
                            !a.NotificacionEnviada &&
                            !a.EsquemaCompletado)
                 .OrderBy(a => a.FechaProximaAplicacion)
@@ -73,6 +75,17 @@ namespace API.Persistence.Repositories
                 .AnyAsync(a => a.PacienteId == pacienteId && 
                               a.VacunaId == vacunaId && 
                               !a.EsquemaCompletado);
+        }
+
+        /// <summary>
+        /// Obtiene la alarma pendiente (no completada) para un paciente y vacuna.
+        /// </summary>
+        public async Task<AlarmaVacunacion?> GetPendienteAsync(int pacienteId, int vacunaId)
+        {
+            return await _context.AlarmasVacunacion
+                .FirstOrDefaultAsync(a => a.PacienteId == pacienteId &&
+                                          a.VacunaId == vacunaId &&
+                                          !a.EsquemaCompletado);
         }
     }
 }

@@ -1,6 +1,7 @@
 using API.Domain.IRepositories;
 using API.Domain.IServices;
 using API.Domain.Models;
+using Microsoft.EntityFrameworkCore;
 
 namespace API.Services
 {
@@ -8,20 +9,55 @@ namespace API.Services
     {
         private readonly IAlarmaVacunacionRepository _alarmaRepository;
         private readonly IVacunaRepository _vacunaRepository;
+        private readonly IEsquemaVacunacionRepository _esquemaRepository;
 
         public AlarmaVacunacionService(
             IAlarmaVacunacionRepository alarmaRepository,
-            IVacunaRepository vacunaRepository)
+            IVacunaRepository vacunaRepository,
+            IEsquemaVacunacionRepository esquemaRepository)
         {
             _alarmaRepository = alarmaRepository;
             _vacunaRepository = vacunaRepository;
+            _esquemaRepository = esquemaRepository;
         }
+
+        // Sobrecarga para compatibilidad con pruebas existentes
+        public AlarmaVacunacionService(
+            IAlarmaVacunacionRepository alarmaRepository,
+            IVacunaRepository vacunaRepository)
+            : this(alarmaRepository, vacunaRepository, null!)
+        { }
 
         /// <summary>
         /// Obtiene las vacunaciones próximas del mes actual
         /// </summary>
         public async Task<IEnumerable<AlarmaVacunacion>> GetVacunacionesProximasMesActualAsync()
         {
+            // Reconciliar: asegurar que existan alarmas para esquemas con próxima dosis en el mes actual
+            var hoy = DateTime.Today;
+            var inicioMes = new DateTime(hoy.Year, hoy.Month, 1);
+            var inicioMesSiguiente = inicioMes.AddMonths(1);
+
+            // Acceder al DbContext para consultar Esquemas sin ampliar interfaz
+            var contextField = _esquemaRepository.GetType().GetField("_context", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
+            var dbContext = contextField?.GetValue(_esquemaRepository) as API.Persistence.Context.AplicationDbContext;
+            if (dbContext != null)
+            {
+                var esquemasMes = dbContext.EsquemasVacunacion
+                    .AsNoTracking()
+                    .Where(e => e.FechaProximaDosis.HasValue &&
+                                e.FechaProximaDosis.Value >= inicioMes &&
+                                e.FechaProximaDosis.Value < inicioMesSiguiente)
+                    .Select(e => new { e.PacienteId, e.VacunaId, e.NumeroDeDosis, e.FechaDosisAplicada, e.FechaProximaDosis })
+                    .ToList();
+
+                foreach (var e in esquemasMes)
+                {
+                    // upsert de alarma por cada esquema relevante
+                    await CrearAlarmaDesdeEsquemaAsync(e.PacienteId, e.VacunaId, e.NumeroDeDosis, e.FechaDosisAplicada, e.FechaProximaDosis);
+                }
+            }
+
             return await _alarmaRepository.GetVacunacionesProximasMesActualAsync();
         }
 
@@ -44,34 +80,43 @@ namespace API.Services
         /// <summary>
         /// Crea alarmas automáticamente cuando se llama al endpoint de esquema vacunación
         /// </summary>
-        public async Task CrearAlarmaDesdeEsquemaAsync(int pacienteId, int vacunaId, int numeroDosiActual, DateTime fechaUltimaAplicacion)
+    public async Task CrearAlarmaDesdeEsquemaAsync(int pacienteId, int vacunaId, int numeroDosiActual, DateTime fechaUltimaAplicacion, DateTime? fechaProximaAplicacion = null)
         {
             // Obtener información de la vacuna
             var vacuna = await _vacunaRepository.GetByIdAsync(vacunaId);
             if (vacuna == null || numeroDosiActual >= vacuna.NumeroDosis)
                 return; // No crear alarma si es la última dosis o vacuna no existe
 
-            // Verificar si ya existe una alarma pendiente
-            if (await _alarmaRepository.ExisteAlarmaPendienteAsync(pacienteId, vacunaId))
-                return;
+            // Calcular la fecha de próxima aplicación usando IntervaloSemanas (solo fecha) o usar la provista
+            var proxima = (fechaProximaAplicacion?.Date) ?? fechaUltimaAplicacion.Date.AddDays(vacuna.IntervaloSemanas * 7).Date;
 
-            // Calcular la fecha de próxima aplicación usando IntervaloSemanas
-            var fechaProximaAplicacion = fechaUltimaAplicacion.AddDays(vacuna.IntervaloSemanas * 7);
-
-            // Crear la alarma
-            var alarma = new AlarmaVacunacion
+            // Si ya existe una alarma pendiente, actualizarla; si no, crearla
+            var existente = await _alarmaRepository.GetPendienteAsync(pacienteId, vacunaId);
+            if (existente != null)
             {
-                PacienteId = pacienteId,
-                VacunaId = vacunaId,
-                DosisActual = numeroDosiActual,
-                FechaPrimeraAplicacion = fechaUltimaAplicacion, // Simplificado para este ejemplo
-                FechaUltimaAplicacion = fechaUltimaAplicacion,
-                FechaProximaAplicacion = fechaProximaAplicacion,
-                EsquemaCompletado = false,
-                NotificacionEnviada = false
-            };
+                // Mantener la primera aplicación original si ya existía
+                existente.DosisActual = numeroDosiActual;
+                existente.FechaUltimaAplicacion = fechaUltimaAplicacion.Date;
+                existente.FechaProximaAplicacion = proxima;
+                existente.NotificacionEnviada = false; // resetear para nueva notificación
+                await _alarmaRepository.UpdateAsync(existente);
+            }
+            else
+            {
+                var alarma = new AlarmaVacunacion
+                {
+                    PacienteId = pacienteId,
+                    VacunaId = vacunaId,
+                    DosisActual = numeroDosiActual,
+                    FechaPrimeraAplicacion = fechaUltimaAplicacion.Date, // primera aplicación
+                    FechaUltimaAplicacion = fechaUltimaAplicacion.Date,
+                    FechaProximaAplicacion = proxima,
+                    EsquemaCompletado = false,
+                    NotificacionEnviada = false
+                };
 
-            await _alarmaRepository.AddAsync(alarma);
+                await _alarmaRepository.AddAsync(alarma);
+            }
         }
     }
 }

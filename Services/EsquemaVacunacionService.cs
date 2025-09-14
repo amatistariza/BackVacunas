@@ -68,8 +68,8 @@ public class EsquemaVacunacionService : IEsquemaVacunacionService
 
     private async Task ProcesarDetallesYGuardar(EsquemaVacunacion esquemaVacunacion)
     {
-        // Normalizar fecha de aplicación (solo fecha, sin hora) ANTES de calcular próxima dosis
-        esquemaVacunacion.FechaDosisAplicada = DateTime.UtcNow.Date;
+    // Normalizar fecha de aplicación (solo fecha local, sin hora) ANTES de calcular próxima dosis
+    esquemaVacunacion.FechaDosisAplicada = DateTime.Today;
 
         foreach (var detalle in esquemaVacunacion.Detalles)
         {
@@ -114,7 +114,8 @@ public class EsquemaVacunacionService : IEsquemaVacunacionService
                 esquemaVacunacion.PacienteId,
                 esquemaVacunacion.VacunaId,
                 esquemaVacunacion.NumeroDeDosis,
-                esquemaVacunacion.FechaDosisAplicada);
+                esquemaVacunacion.FechaDosisAplicada,
+                esquemaVacunacion.FechaProximaDosis);
         }
     }
 

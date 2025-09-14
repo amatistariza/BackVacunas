@@ -1,3 +1,4 @@
+#nullable enable annotations
 using API.Domain.Models;
 using API.Domain.IRepositories;
 
@@ -24,5 +25,9 @@ namespace API.Domain.IRepositories
         /// Verifica si ya existe una alarma para el paciente y vacuna
         /// </summary>
         Task<bool> ExisteAlarmaPendienteAsync(int pacienteId, int vacunaId);
+        /// <summary>
+        /// Obtiene una alarma pendiente por paciente y vacuna
+        /// </summary>
+        Task<AlarmaVacunacion?> GetPendienteAsync(int pacienteId, int vacunaId);
     }
 }

@@ -29,7 +29,7 @@ public class EsquemaVacunacionValidacionTests
         var jeringaRepo = new JeringaRepository(ctx);
         var pacienteRepo = new PacienteRepository(ctx);
         var alarmaRepo = new AlarmaVacunacionRepository(ctx);
-        var alarmaService = new AlarmaVacunacionService(alarmaRepo, vacunaRepo);
+    var alarmaService = new AlarmaVacunacionService(alarmaRepo, vacunaRepo, esquemaRepo);
         return new EsquemaVacunacionService(esquemaRepo, vacunaRepo, diluyenteRepo, jeringaRepo, pacienteRepo, alarmaService);
     }
 
