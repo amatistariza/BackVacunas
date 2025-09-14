@@ -42,13 +42,35 @@ public class EsquemaVacunacionService : IEsquemaVacunacionService
         if (vacunaPrincipal == null)
             throw new InvalidOperationException($"VacunaId {esquemaVacunacion.VacunaId} no existe.");
 
+        // Verificar si el esquema ya está completo para este paciente y vacuna
+        var contextFieldPre = _esquemaRepository.GetType().GetField("_context", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
+        var dbContextPre = contextFieldPre?.GetValue(_esquemaRepository) as API.Persistence.Context.AplicationDbContext;
+        if (dbContextPre != null)
+        {
+            var maxDosisActual = await dbContextPre.EsquemasVacunacion
+                .Where(e => e.PacienteId == esquemaVacunacion.PacienteId && e.VacunaId == esquemaVacunacion.VacunaId)
+                .Select(e => (int?)e.NumeroDeDosis)
+                .MaxAsync();
+            if ((maxDosisActual ?? 0) >= vacunaPrincipal.NumeroDosis)
+            {
+                throw new InvalidOperationException("El esquema de vacunación ya está completo para esta vacuna.");
+            }
+        }
+
         // Transacción manual (contexto detrás de repos); se asume que todos repos usan mismo DbContext
         // Para minimizar cambios, si ocurre excepción en medio, se lanzará y se revertirá la transacción.
-        var contextField = _esquemaRepository.GetType().GetField("_context", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
-        var dbContext = contextField?.GetValue(_esquemaRepository) as API.Persistence.Context.AplicationDbContext;
+    var contextField = _esquemaRepository.GetType().GetField("_context", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
+    var dbContext = contextField?.GetValue(_esquemaRepository) as API.Persistence.Context.AplicationDbContext;
         if (dbContext == null)
         {
             // Fallback sin transacción explícita
+            await ProcesarDetallesYGuardar(esquemaVacunacion);
+            return;
+        }
+
+        // Usar transacción solo si el proveedor es relacional; InMemory no soporta transacciones
+        if (!dbContext.Database.IsRelational())
+        {
             await ProcesarDetallesYGuardar(esquemaVacunacion);
             return;
         }
@@ -76,11 +98,12 @@ public class EsquemaVacunacionService : IEsquemaVacunacionService
         var dbContext = contextField?.GetValue(_esquemaRepository) as API.Persistence.Context.AplicationDbContext;
         if (dbContext != null)
         {
-            var ultima = await dbContext.EsquemasVacunacion
+            // Tomar la máxima dosis registrada para evitar empates por fecha
+            var maxDosis = await dbContext.EsquemasVacunacion
                 .Where(e => e.PacienteId == esquemaVacunacion.PacienteId && e.VacunaId == esquemaVacunacion.VacunaId)
-                .OrderByDescending(e => e.FechaDosisAplicada)
-                .FirstOrDefaultAsync();
-            esquemaVacunacion.NumeroDeDosis = (ultima == null) ? 1 : ultima.NumeroDeDosis + 1;
+                .Select(e => (int?)e.NumeroDeDosis)
+                .MaxAsync();
+            esquemaVacunacion.NumeroDeDosis = (maxDosis ?? 0) + 1;
         }
 
         foreach (var detalle in esquemaVacunacion.Detalles)
@@ -149,46 +172,53 @@ public class EsquemaVacunacionService : IEsquemaVacunacionService
         if (vacuna == null)
             return (false, 0, "Vacuna no existe");
 
-        // Traer último esquema registrado para ese paciente y vacuna
+        // Consultar contexto para calcular de forma determinística
         var contextField = _esquemaRepository.GetType().GetField("_context", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
         var dbContext = contextField?.GetValue(_esquemaRepository) as API.Persistence.Context.AplicationDbContext;
-        EsquemaVacunacion ultimo = null;
-        if (dbContext != null)
+        if (dbContext == null)
         {
-            ultimo = dbContext.EsquemasVacunacion
-                .Where(e => e.PacienteId == pacienteId && e.VacunaId == vacunaId)
-                .OrderByDescending(e => e.FechaDosisAplicada)
-                .FirstOrDefault();
+            // Fallback: sin contexto, permitir primera dosis
+            return (true, 1, "Puede aplicarse la primera dosis");
         }
 
-        // Si no hay registros todavía → primera dosis aplica inmediatamente
-        if (ultimo == null)
+        // Calcular máxima dosis aplicada
+        var maxDosis = await dbContext.EsquemasVacunacion
+            .Where(e => e.PacienteId == pacienteId && e.VacunaId == vacunaId)
+            .Select(e => (int?)e.NumeroDeDosis)
+            .MaxAsync();
+
+        if (maxDosis == null)
         {
             return (true, 1, "Puede aplicarse la primera dosis");
         }
 
-        // Si ya completó todas las dosis
-        if (ultimo.NumeroDeDosis >= vacuna.NumeroDosis)
+        if (maxDosis.Value >= vacuna.NumeroDosis)
         {
-            return (false, ultimo.NumeroDeDosis, "Esquema de vacunación finalizado");
+            return (false, maxDosis.Value, "Esquema de vacunación finalizado");
         }
 
-        // Calcular fecha próxima esperada (si no se guardó ya)
-        var fechaProxima = ultimo.FechaProximaDosis;
+        // Traer el último registro correspondiente a la dosis máxima para calcular la fecha próxima
+        var ultimo = await dbContext.EsquemasVacunacion
+            .Where(e => e.PacienteId == pacienteId && e.VacunaId == vacunaId && e.NumeroDeDosis == maxDosis.Value)
+            .OrderByDescending(e => e.FechaDosisAplicada)
+            .FirstOrDefaultAsync();
+
+        var fechaProxima = ultimo?.FechaProximaDosis;
         if (!fechaProxima.HasValue)
         {
-            fechaProxima = ultimo.FechaDosisAplicada.Date.AddDays(vacuna.IntervaloSemanas * 7).Date;
+            var baseDate = (ultimo?.FechaDosisAplicada ?? DateTime.Today).Date;
+            fechaProxima = baseDate.AddDays(vacuna.IntervaloSemanas * 7).Date;
         }
 
-    var hoy = DateTime.Today;
+        var hoy = DateTime.Today;
         if (hoy < fechaProxima.Value.Date)
         {
             var faltan = (fechaProxima.Value.Date - hoy).Days;
-            return (false, ultimo.NumeroDeDosis + 1, $"Todavía no corresponde. Faltan  {faltan} día(s) para la siguiente dosis.");
+            return (false, maxDosis.Value + 1, $"Todavía no corresponde. Faltan  {faltan} día(s) para la siguiente dosis.");
         }
 
         // Es el día o ya pasó la fecha → puede aplicarse siguiente dosis
-        return (true, ultimo.NumeroDeDosis + 1, $"Debe aplicarse la dosis número {ultimo.NumeroDeDosis + 1}.");
+        return (true, maxDosis.Value + 1, $"Debe aplicarse la dosis número {maxDosis.Value + 1}.");
     }
 
     public async Task<IEnumerable<API.DTO.EsquemaVacunacionListadoDto>> ListarEsquemasAsync(string identificacion = null)
