@@ -38,6 +38,9 @@ if (das == 1)
     builder.Services.AddScoped<IEsquemaVacunacionService, EsquemaVacunacionService>();
     builder.Services.AddScoped<IPacienteService, PacienteService>();
     builder.Services.AddScoped<IAlarmaVacunacionService, AlarmaVacunacionService>();
+    builder.Services.AddScoped<IStatisticsService, StatisticsService>();
+    builder.Services.AddScoped<IStatisticsService, StatisticsService>();
+    builder.Services.AddMemoryCache();
 
     // Repositorios
     builder.Services.AddScoped<IUsuarioRepository, UsuarioRepository>();
@@ -75,6 +78,9 @@ if (das == 1)
     builder.Services.AddScoped<IBaseService<CondicionUsuaria>, CondicionUsuariaService>();
     builder.Services.AddScoped<IBaseService<AntecedentesMedicos>, AntecedentesMedicosService>();
     builder.Services.AddScoped<IBaseService<Paciente>, PacienteService>();
+
+    // Caching para endpoints de estadísticas
+    builder.Services.AddMemoryCache();
 
     // Configuración de CORS
     builder.Services.AddCors(options =>
@@ -138,8 +144,12 @@ if (das == 1)
         app.UseHsts(); // Añade cabecera Strict-Transport-Security
     }
 
-    // Usar redireccionamiento a HTTPS
-    app.UseHttpsRedirection();
+    // Redireccionamiento a HTTPS solo si hay puerto HTTPS configurado
+    var httpsPortEnv = Environment.GetEnvironmentVariable("ASPNETCORE_HTTPS_PORT");
+    if (!string.IsNullOrEmpty(httpsPortEnv))
+    {
+        app.UseHttpsRedirection();
+    }
 
     // Configuración de Swagger para todos los entornos
     app.UseSwagger();
@@ -201,6 +211,10 @@ else
     builder.Services.AddControllers().AddNewtonsoftJson(options =>
         options.SerializerSettings.ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore);
 
+    // Servicios y caché para estadísticas (modo alterno)
+    builder.Services.AddScoped<IStatisticsService, StatisticsService>();
+    builder.Services.AddMemoryCache();
+
     // Configuración de Swagger
     builder.Services.AddEndpointsApiExplorer();
     builder.Services.AddSwaggerGen(c =>
@@ -228,7 +242,11 @@ else
 
     app.UseCors("AllowWebapp");
 
-    app.UseHttpsRedirection();
+    var httpsPortEnv2 = Environment.GetEnvironmentVariable("ASPNETCORE_HTTPS_PORT");
+    if (!string.IsNullOrEmpty(httpsPortEnv2))
+    {
+        app.UseHttpsRedirection();
+    }
 
     app.UseAuthentication();
 

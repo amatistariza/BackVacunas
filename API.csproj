@@ -25,14 +25,16 @@
     <PackageReference Include="Swashbuckle.AspNetCore" Version="6.4.0" />
   </ItemGroup>
 
+  <!-- Asegurar que no se incluyan artefactos de bin/obj (de esta u otras carpetas) como contenido a copiar -->
   <ItemGroup>
-    <None Include="Rotativa\.vs\wkhtmltoimage\v16\.suo" />
-  </ItemGroup>
-
-  <!-- Excluir archivos del proyecto de pruebas del build de la API -->
-  <ItemGroup>
-    <Compile Remove="BackVacunas.Tests/**/*.cs" />
-    <None Include="BackVacunas.Tests/**/*.cs" />
+    <None Remove="**/bin/**" />
+    <None Remove="**/obj/**" />
+    <Content Remove="**/bin/**" />
+    <Content Remove="**/obj/**" />
+    <!-- Excluir el proyecto de pruebas del build de la API -->
+    <Compile Remove="BackVacunas.Tests/**" />
+    <None Remove="BackVacunas.Tests/**" />
+    <Content Remove="BackVacunas.Tests/**" />
   </ItemGroup>
 
 </Project>

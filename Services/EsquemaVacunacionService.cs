@@ -164,10 +164,10 @@ public class EsquemaVacunacionService : IEsquemaVacunacionService
         if (hoy < fechaProxima.Value.Date)
         {
             var faltan = (fechaProxima.Value.Date - hoy).Days;
-            return (false, ultimo.NumeroDeDosis + 1, $"Todavía no corresponde. Faltan {faltan} día(s) para la siguiente dosis");
+            return (false, ultimo.NumeroDeDosis + 1, $"Todavía no corresponde. Faltan  {faltan} día(s) para la siguiente dosis.");
         }
 
         // Es el día o ya pasó la fecha → puede aplicarse siguiente dosis
-        return (true, ultimo.NumeroDeDosis + 1, $"Debe aplicarse la dosis número {ultimo.NumeroDeDosis + 1}");
+        return (true, ultimo.NumeroDeDosis + 1, $"Debe aplicarse la dosis número {ultimo.NumeroDeDosis + 1}.");
     }
 }

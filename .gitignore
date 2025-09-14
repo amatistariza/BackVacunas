@@ -62,6 +62,11 @@ x86/
 Rotativa/Temp/
 Rotativa/Generated/
 
+# --- Team request: ignore EF Core migrations locally ---
+# Advertencia: Al ignorar Migrations/ el control de esquema se pierde en git.
+# Asegúrense de recrear migraciones cuando hagan deploy o mantener un script SQL.
+Migrations/
+
 # Cache
 *.cache
 

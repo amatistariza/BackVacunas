@@ -51,6 +51,12 @@ public class PacienteController : ControllerBase
         if (!ModelState.IsValid)
             return BadRequest(ModelState);
 
+        // Validación: no permitir registrar pacientes ya registrados por NumeroIdentificacion
+        // Nota: se asume unicidad por NumeroIdentificacion; si también debe incluir TipoIdentificacion, ampliamos el repositorio.
+        var existente = await _pacienteService.GetByPacienteIdAsync(pacienteCreateDto.NumeroIdentificacion);
+        if (existente != null)
+            return Conflict(new { mensaje = "Paciente ya registrado con ese número de identificación." });
+
         // Map DTO to Entity
         var paciente = _mapper.Map<Paciente>(pacienteCreateDto);
         

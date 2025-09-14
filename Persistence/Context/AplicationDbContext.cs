@@ -30,6 +30,10 @@ public class AplicationDbContext : DbContext
     {
         modelBuilder.Entity<Antecedente>().ToTable("Antecedentes");
         modelBuilder.Entity<Paciente>().ToTable("Pacientes");
+        // Índice único por tipo+numero de identificación para evitar duplicados
+        modelBuilder.Entity<Paciente>()
+            .HasIndex(p => new { p.TipoIdentificacion, p.NumeroIdentificacion })
+            .IsUnique();
 
         modelBuilder.Entity<Paciente>()
             .HasMany(p => p.Antecedentes)
