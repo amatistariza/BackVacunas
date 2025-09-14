@@ -24,10 +24,24 @@ namespace API.Controllers
             try
             {
                 var alarmas = await _alarmaService.GetVacunacionesProximasMesActualAsync();
-                return Ok(new { 
+
+                var data = alarmas.Select(a => new API.DTO.AlarmaProximaDto
+                {
+                    TipoIdentificacion = a.Paciente?.TipoIdentificacion ?? string.Empty,
+                    NumeroIdentificacion = a.Paciente?.NumeroIdentificacion ?? string.Empty,
+                    Nombre = string.Join(" ", new[] { a.Paciente?.PrimerNombre, a.Paciente?.SegundoNombre, a.Paciente?.PrimerApellido, a.Paciente?.SegundoApellido }.Where(s => !string.IsNullOrWhiteSpace(s))),
+                    Telefono = a.Paciente?.TelefonoFijo,
+                    Celular = a.Paciente?.Celular,
+                    Correo = a.Paciente?.Email,
+                    Pendiente = $"Dosis {a.DosisActual + 1} de {a.Vacuna?.Nombre}",
+                    FechaAplicacion = a.FechaProximaAplicacion,
+                    Ok = a.NotificacionEnviada
+                }).ToList();
+
+                return Ok(new {
                     mensaje = "Vacunaciones próximas del mes actual obtenidas exitosamente.",
-                    data = alarmas,
-                    total = alarmas.Count()
+                    data,
+                    total = data.Count
                 });
             }
             catch (Exception ex)
