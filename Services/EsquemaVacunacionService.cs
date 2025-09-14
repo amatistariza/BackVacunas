@@ -71,6 +71,18 @@ public class EsquemaVacunacionService : IEsquemaVacunacionService
     // Normalizar fecha de aplicación (solo fecha local, sin hora) ANTES de calcular próxima dosis
     esquemaVacunacion.FechaDosisAplicada = DateTime.Today;
 
+        // Calcular NumeroDeDosis en servidor según historial
+        var contextField = _esquemaRepository.GetType().GetField("_context", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
+        var dbContext = contextField?.GetValue(_esquemaRepository) as API.Persistence.Context.AplicationDbContext;
+        if (dbContext != null)
+        {
+            var ultima = await dbContext.EsquemasVacunacion
+                .Where(e => e.PacienteId == esquemaVacunacion.PacienteId && e.VacunaId == esquemaVacunacion.VacunaId)
+                .OrderByDescending(e => e.FechaDosisAplicada)
+                .FirstOrDefaultAsync();
+            esquemaVacunacion.NumeroDeDosis = (ultima == null) ? 1 : ultima.NumeroDeDosis + 1;
+        }
+
         foreach (var detalle in esquemaVacunacion.Detalles)
         {
             if (detalle.VacunaId.HasValue)
@@ -102,12 +114,13 @@ public class EsquemaVacunacionService : IEsquemaVacunacionService
         }
         else
         {
+            // Última dosis aplicada: no hay próxima dosis
             esquemaVacunacion.FechaProximaDosis = null;
         }
 
         await _esquemaRepository.AddAsync(esquemaVacunacion);
 
-        // Crear alarma sólo si hay próxima dosis
+        // Si hay próxima dosis: crear/actualizar alarma; si no, marcar alarmas como completadas
         if (esquemaVacunacion.FechaProximaDosis.HasValue)
         {
             await _alarmaService.CrearAlarmaDesdeEsquemaAsync(
@@ -116,6 +129,11 @@ public class EsquemaVacunacionService : IEsquemaVacunacionService
                 esquemaVacunacion.NumeroDeDosis,
                 esquemaVacunacion.FechaDosisAplicada,
                 esquemaVacunacion.FechaProximaDosis);
+        }
+        else if (vacuna != null && esquemaVacunacion.NumeroDeDosis >= vacuna.NumeroDosis)
+        {
+            // Marcar cualquier alarma pendiente como esquema completado
+            await _alarmaService.MarcarEsquemaCompletadoAsync(esquemaVacunacion.PacienteId, esquemaVacunacion.VacunaId);
         }
     }
 
@@ -162,7 +180,7 @@ public class EsquemaVacunacionService : IEsquemaVacunacionService
             fechaProxima = ultimo.FechaDosisAplicada.Date.AddDays(vacuna.IntervaloSemanas * 7).Date;
         }
 
-        var hoy = DateTime.UtcNow.Date;
+    var hoy = DateTime.Today;
         if (hoy < fechaProxima.Value.Date)
         {
             var faltan = (fechaProxima.Value.Date - hoy).Days;

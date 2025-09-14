@@ -23,5 +23,6 @@ namespace API.Domain.IServices
         /// Crea alarmas automáticamente cuando se llama al endpoint de esquema vacunación
         /// </summary>
     Task CrearAlarmaDesdeEsquemaAsync(int pacienteId, int vacunaId, int numeroDosiActual, DateTime fechaUltimaAplicacion, DateTime? fechaProximaAplicacion = null);
+    Task<bool> MarcarEsquemaCompletadoAsync(int pacienteId, int vacunaId);
     }
 }

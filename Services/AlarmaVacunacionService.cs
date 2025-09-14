@@ -97,8 +97,14 @@ namespace API.Services
                 // Mantener la primera aplicación original si ya existía
                 existente.DosisActual = numeroDosiActual;
                 existente.FechaUltimaAplicacion = fechaUltimaAplicacion.Date;
+                // Si la fecha próxima cambió, se reinicia la notificación; si no, se conserva el estado 'ok'
+                bool cambioProxima = existente.FechaProximaAplicacion.Date != proxima;
                 existente.FechaProximaAplicacion = proxima;
-                existente.NotificacionEnviada = false; // resetear para nueva notificación
+                if (cambioProxima)
+                {
+                    existente.NotificacionEnviada = false;
+                    existente.FechaNotificacion = null;
+                }
                 await _alarmaRepository.UpdateAsync(existente);
             }
             else
@@ -117,6 +123,16 @@ namespace API.Services
 
                 await _alarmaRepository.AddAsync(alarma);
             }
+        }
+
+        public async Task<bool> MarcarEsquemaCompletadoAsync(int pacienteId, int vacunaId)
+        {
+            var pendiente = await _alarmaRepository.GetPendienteAsync(pacienteId, vacunaId);
+            if (pendiente == null) return false;
+            pendiente.EsquemaCompletado = true;
+            pendiente.NotificacionEnviada = true; // opcional: ya no notificar más
+            await _alarmaRepository.UpdateAsync(pendiente);
+            return true;
         }
     }
 }
