@@ -37,6 +37,8 @@ public class StatisticsService : IStatisticsService
             .ContinueWith(t => t.Result ?? 0);
         var totalSyringesTask = _db.Jeringas.AsNoTracking().SumAsync(j => (int?)j.CantidadDisponible)
             .ContinueWith(t => t.Result ?? 0);
+        var totalDiluentsTask = _db.Diluyentes.AsNoTracking().SumAsync(d => (int?)d.CantidadDisponible)
+            .ContinueWith(t => t.Result ?? 0);
 
         var applicationsTodayTask = _db.RegistrosVacunacion.AsNoTracking()
             .CountAsync(r => r.FechaAplicacion >= today && r.FechaAplicacion < tomorrow);
@@ -46,7 +48,7 @@ public class StatisticsService : IStatisticsService
 
         var vaccinesBelowTask = _db.Vacunas.AsNoTracking().CountAsync(v => v.DosisDisponibles < lowStockThreshold);
         var syringesBelowTask = _db.Jeringas.AsNoTracking().CountAsync(j => j.CantidadDisponible < lowStockThreshold);
-        await Task.WhenAll(totalVaccineDosesTask, totalSyringesTask,
+        await Task.WhenAll(totalVaccineDosesTask, totalSyringesTask, totalDiluentsTask,
             applicationsTodayTask, applicationsThisWeekTask,
             vaccinesBelowTask, syringesBelowTask);
 
@@ -55,6 +57,7 @@ public class StatisticsService : IStatisticsService
             LastUpdated = today,
             TotalVaccineDoses = totalVaccineDosesTask.Result,
             TotalSyringes = totalSyringesTask.Result,
+            TotalDiluents = totalDiluentsTask.Result,
             ApplicationsToday = applicationsTodayTask.Result,
             ApplicationsThisWeek = applicationsThisWeekTask.Result,
             LowStock = new LowStockSummaryDto
