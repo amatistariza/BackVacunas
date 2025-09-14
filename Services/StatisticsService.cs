@@ -32,39 +32,33 @@ public class StatisticsService : IStatisticsService
         var tomorrow = today.AddDays(1);
         var startOfWeek = StartOfWeek(today, DayOfWeek.Monday);
 
-        // Parallelize the queries when possible
-        var totalVaccineDosesTask = _db.Vacunas.AsNoTracking().SumAsync(v => (int?)v.DosisDisponibles) // nullable to handle empty set
-            .ContinueWith(t => t.Result ?? 0);
-        var totalSyringesTask = _db.Jeringas.AsNoTracking().SumAsync(j => (int?)j.CantidadDisponible)
-            .ContinueWith(t => t.Result ?? 0);
-        var totalDiluentsTask = _db.Diluyentes.AsNoTracking().SumAsync(d => (int?)d.CantidadDisponible)
-            .ContinueWith(t => t.Result ?? 0);
+        // Ejecutar consultas secuencialmente para evitar concurrencia en DbContext
+        var totalVaccineDoses = (await _db.Vacunas.AsNoTracking().SumAsync(v => (int?)v.DosisDisponibles)) ?? 0;
+        var totalSyringes = (await _db.Jeringas.AsNoTracking().SumAsync(j => (int?)j.CantidadDisponible)) ?? 0;
+        var totalDiluents = (await _db.Diluyentes.AsNoTracking().SumAsync(d => (int?)d.CantidadDisponible)) ?? 0;
 
-        var applicationsTodayTask = _db.RegistrosVacunacion.AsNoTracking()
+        var applicationsToday = await _db.RegistrosVacunacion.AsNoTracking()
             .CountAsync(r => r.FechaAplicacion >= today && r.FechaAplicacion < tomorrow);
 
-        var applicationsThisWeekTask = _db.RegistrosVacunacion.AsNoTracking()
+        var applicationsThisWeek = await _db.RegistrosVacunacion.AsNoTracking()
             .CountAsync(r => r.FechaAplicacion >= startOfWeek && r.FechaAplicacion < tomorrow);
 
-        var vaccinesBelowTask = _db.Vacunas.AsNoTracking().CountAsync(v => v.DosisDisponibles < lowStockThreshold);
-        var syringesBelowTask = _db.Jeringas.AsNoTracking().CountAsync(j => j.CantidadDisponible < lowStockThreshold);
-        await Task.WhenAll(totalVaccineDosesTask, totalSyringesTask, totalDiluentsTask,
-            applicationsTodayTask, applicationsThisWeekTask,
-            vaccinesBelowTask, syringesBelowTask);
+        var vaccinesBelow = await _db.Vacunas.AsNoTracking().CountAsync(v => v.DosisDisponibles < lowStockThreshold);
+        var syringesBelow = await _db.Jeringas.AsNoTracking().CountAsync(j => j.CantidadDisponible < lowStockThreshold);
 
         var dto = new NurseDashboardStatisticsDto
         {
             LastUpdated = today,
-            TotalVaccineDoses = totalVaccineDosesTask.Result,
-            TotalSyringes = totalSyringesTask.Result,
-            TotalDiluents = totalDiluentsTask.Result,
-            ApplicationsToday = applicationsTodayTask.Result,
-            ApplicationsThisWeek = applicationsThisWeekTask.Result,
+            TotalVaccineDoses = totalVaccineDoses,
+            TotalSyringes = totalSyringes,
+            TotalDiluents = totalDiluents,
+            ApplicationsToday = applicationsToday,
+            ApplicationsThisWeek = applicationsThisWeek,
             LowStock = new LowStockSummaryDto
             {
                 Threshold = lowStockThreshold,
-                VaccinesBelowThreshold = vaccinesBelowTask.Result,
-                SyringesBelowThreshold = syringesBelowTask.Result
+                VaccinesBelowThreshold = vaccinesBelow,
+                SyringesBelowThreshold = syringesBelow
             }
         };
 
