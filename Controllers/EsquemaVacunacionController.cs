@@ -15,6 +15,21 @@ public class EsquemaVacunacionController : ControllerBase
         _esquemaService = esquemaService;
     }
 
+    // GET: api/esquemavacunacion
+    [HttpGet]
+    public async Task<IActionResult> ListarEsquemas()
+    {
+        try
+        {
+            var lista = await _esquemaService.ListarEsquemasAsync();
+            return Ok(lista);
+        }
+        catch (Exception ex)
+        {
+            return StatusCode(500, new { mensaje = "Error obteniendo esquemas.", error = ex.Message, inner = ex.InnerException?.Message });
+        }
+    }
+
     [HttpPost]
     public async Task<IActionResult> RegistrarEsquema([FromBody] EsquemaVacunacionCreateDTO dto)
     {

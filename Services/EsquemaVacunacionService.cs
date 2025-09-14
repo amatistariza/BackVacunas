@@ -1,6 +1,7 @@
 ﻿using API.Domain.IRepositories;
 using API.Domain.IServices;
 using API.Domain.Models;
+using Microsoft.EntityFrameworkCore;
 
 namespace API.Services;
 
@@ -169,5 +170,58 @@ public class EsquemaVacunacionService : IEsquemaVacunacionService
 
         // Es el día o ya pasó la fecha → puede aplicarse siguiente dosis
         return (true, ultimo.NumeroDeDosis + 1, $"Debe aplicarse la dosis número {ultimo.NumeroDeDosis + 1}.");
+    }
+
+    public async Task<IEnumerable<API.DTO.EsquemaVacunacionListadoDto>> ListarEsquemasAsync()
+    {
+        // Acceder al DbContext subyacente del repo para construir una consulta con includes
+        var contextField = _esquemaRepository.GetType().GetField("_context", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
+        var dbContext = contextField?.GetValue(_esquemaRepository) as API.Persistence.Context.AplicationDbContext;
+        if (dbContext == null)
+        {
+            // Fallback simple: cargar todo y proyectar (menos eficiente)
+            var todos = await _esquemaRepository.GetAllAsync();
+            var resultados = new List<API.DTO.EsquemaVacunacionListadoDto>();
+            foreach (var e in todos)
+            {
+                var paciente = await _pacienteRepository.GetByIdAsync(e.PacienteId);
+                var vacuna = await _vacunaRepository.GetByIdAsync(e.VacunaId);
+                resultados.Add(new API.DTO.EsquemaVacunacionListadoDto
+                {
+                    Id = e.Id,
+                    TipoCarnet = e.TipoCarnet,
+                    RegistradoPAI = e.RegistradoPAI,
+                    NombreCompleto = paciente != null ? $"{paciente.PrimerNombre} {paciente.PrimerApellido}" : string.Empty,
+                    VacunaAplicada = vacuna?.Nombre ?? string.Empty,
+                    FechaAplicada = e.FechaDosisAplicada,
+                    FechaProxima = e.FechaProximaDosis,
+                    Responsable = e.Responsable
+                });
+            }
+            return resultados;
+        }
+
+        // Consulta optimizada con includes
+        var query = dbContext.EsquemasVacunacion
+            .AsNoTracking()
+            .Include(x => x.Paciente)
+            .Include(x => x.Vacuna)
+            .OrderByDescending(x => x.FechaDosisAplicada);
+
+        var lista = await query
+            .Select(e => new API.DTO.EsquemaVacunacionListadoDto
+            {
+                Id = e.Id,
+                TipoCarnet = e.TipoCarnet,
+                RegistradoPAI = e.RegistradoPAI,
+                NombreCompleto = (e.Paciente.PrimerNombre + " " + e.Paciente.PrimerApellido).Trim(),
+                VacunaAplicada = e.Vacuna.Nombre,
+                FechaAplicada = e.FechaDosisAplicada,
+                FechaProxima = e.FechaProximaDosis,
+                Responsable = e.Responsable
+            })
+            .ToListAsync();
+
+        return lista;
     }
 }

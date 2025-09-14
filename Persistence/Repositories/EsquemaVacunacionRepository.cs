@@ -24,5 +24,13 @@ namespace API.Persistence.Repositories
                 .Include(e => e.Vacuna)
                 .FirstOrDefaultAsync(e => e.Id == esquemaId);
         }
+
+        public IQueryable<EsquemaVacunacion> QueryConPacienteYVacuna()
+        {
+            return _context.EsquemasVacunacion
+                .AsNoTracking()
+                .Include(e => e.Paciente)
+                .Include(e => e.Vacuna);
+        }
     }
 }

@@ -7,5 +7,6 @@ namespace API.Domain.IServices
         Task RegistrarEsquemaAsync(EsquemaVacunacion esquemaVacunacion);
         Task<EsquemaVacunacion> GetEsquemaConDetallesAsync(int esquemaId);
     Task<(bool aplica, int numeroDosis, string mensaje)> ValidarAplicacionDosisAsync(int pacienteId, int vacunaId);
+        Task<IEnumerable<API.DTO.EsquemaVacunacionListadoDto>> ListarEsquemasAsync();
     }
 }
