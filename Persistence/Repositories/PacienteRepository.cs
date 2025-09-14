@@ -8,12 +8,8 @@ namespace API.Persistence.Repositories
 {
     public class PacienteRepository : Repository<Paciente>, IPacienteRepository
     {
-        private readonly AplicationDbContext _context;
-
-
         public PacienteRepository(AplicationDbContext context) : base(context)
         {
-            _context = context;
         }
 
         public async Task<PacienteDTO> GetByPacienteIdAsync(string pacienteId)

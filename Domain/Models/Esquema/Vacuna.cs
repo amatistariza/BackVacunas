@@ -1,4 +1,5 @@
-﻿namespace API.Domain.Models.Esquema;
+﻿#nullable enable annotations
+namespace API.Domain.Models.Esquema;
 
 public class Vacuna
 {

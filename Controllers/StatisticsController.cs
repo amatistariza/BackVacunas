@@ -24,4 +24,13 @@ public class StatisticsController : ControllerBase
         var stats = await _statisticsService.GetNurseDashboardAsync(lowStockThreshold);
         return Ok(stats);
     }
+
+    // GET: api/estadisticas/dosis-por-vacuna?desde=2025-09-01&hasta=2025-09-13
+    [HttpGet("dosis-por-vacuna")]
+    [ProducesResponseType(typeof(IReadOnlyList<DosisPorVacunaDto>), 200)]
+    public async Task<ActionResult<IReadOnlyList<DosisPorVacunaDto>>> GetDosesPerVaccine([FromQuery] DateTime? desde = null, [FromQuery] DateTime? hasta = null)
+    {
+        var data = await _statisticsService.GetDosesPerVaccineAsync(desde, hasta);
+        return Ok(data);
+    }
 }

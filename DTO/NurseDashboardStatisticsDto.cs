@@ -23,6 +23,9 @@ public class NurseDashboardStatisticsDto
     [JsonProperty("aplicacionesSemana")]
     public int ApplicationsThisWeek { get; set; }
 
+    [JsonProperty("aplicacionesMes")]
+    public int ApplicationsThisMonth { get; set; }
+
     [JsonProperty("bajoStock")]
     public LowStockSummaryDto LowStock { get; set; } = new LowStockSummaryDto();
 }

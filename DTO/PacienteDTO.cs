@@ -1,3 +1,4 @@
+#nullable enable annotations
 namespace API.Domain.DTOs
 {
     using API.Domain.Models;

@@ -1,3 +1,4 @@
+#nullable enable annotations
 using System.ComponentModel.DataAnnotations;
 
 namespace API.DTO
@@ -18,19 +19,19 @@ namespace API.DTO
         [Required]
         public int NumeroDosis { get; set; }
 
-        [StringLength(100)]
-        public string? LugarAplicacion { get; set; }
+    [StringLength(100)]
+    public string? LugarAplicacion { get; set; }
 
-        [StringLength(50)]
-        public string? Lote { get; set; }
+    [StringLength(50)]
+    public string? Lote { get; set; }
 
-        public string? VacunaNombre { get; set; }
+    public string? VacunaNombre { get; set; }
 
-        public string? PacienteNombre { get; set; }
+    public string? PacienteNombre { get; set; }
 
         public DateTime FechaRegistro { get; set; }
 
-        public string? Observaciones { get; set; }
+    public string? Observaciones { get; set; }
     }
 
     public class RegistroVacunacionCreateDTO
@@ -47,12 +48,12 @@ namespace API.DTO
         [Required]
         public int NumeroDosis { get; set; }
 
-        [StringLength(100)]
-        public string? LugarAplicacion { get; set; }
+    [StringLength(100)]
+    public string? LugarAplicacion { get; set; }
 
-        [StringLength(50)]
-        public string? Lote { get; set; }
+    [StringLength(50)]
+    public string? Lote { get; set; }
 
-        public string? Observaciones { get; set; }
+    public string? Observaciones { get; set; }
     }
 }
