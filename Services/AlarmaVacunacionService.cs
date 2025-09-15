@@ -94,18 +94,44 @@ namespace API.Services
             var existente = await _alarmaRepository.GetPendienteAsync(pacienteId, vacunaId);
             if (existente != null)
             {
-                // Mantener la primera aplicación original si ya existía
-                existente.DosisActual = numeroDosiActual;
-                existente.FechaUltimaAplicacion = fechaUltimaAplicacion.Date;
-                // Si la fecha próxima cambió, se reinicia la notificación; si no, se conserva el estado 'ok'
-                bool cambioProxima = existente.FechaProximaAplicacion.Date != proxima;
-                existente.FechaProximaAplicacion = proxima;
-                if (cambioProxima)
+                // Si la alarma existente corresponde a una dosis anterior a la actual, o ya se alcanzó la fecha programada, cerrarla
+                bool dosisAvanzo = existente.DosisActual < numeroDosiActual;
+                bool fechaCumplida = fechaUltimaAplicacion.Date >= existente.FechaProximaAplicacion.Date;
+                if (dosisAvanzo || fechaCumplida)
                 {
-                    existente.NotificacionEnviada = false;
-                    existente.FechaNotificacion = null;
+                    existente.FechaUltimaAplicacion = fechaUltimaAplicacion.Date;
+                    existente.NotificacionEnviada = true; // se consumió la alarma por aplicación presencial
+                    existente.FechaNotificacion = DateTime.Now;
+                    await _alarmaRepository.UpdateAsync(existente);
+
+                    // Crear una nueva alarma para la siguiente dosis
+                    var nueva = new AlarmaVacunacion
+                    {
+                        PacienteId = pacienteId,
+                        VacunaId = vacunaId,
+                        DosisActual = numeroDosiActual,
+                        FechaPrimeraAplicacion = fechaUltimaAplicacion.Date,
+                        FechaUltimaAplicacion = fechaUltimaAplicacion.Date,
+                        FechaProximaAplicacion = proxima,
+                        EsquemaCompletado = false,
+                        NotificacionEnviada = false
+                    };
+                    await _alarmaRepository.AddAsync(nueva);
                 }
-                await _alarmaRepository.UpdateAsync(existente);
+                else
+                {
+                    // Mantener la primera aplicación original si ya existía y actualizar a la siguiente
+                    existente.DosisActual = numeroDosiActual;
+                    existente.FechaUltimaAplicacion = fechaUltimaAplicacion.Date;
+                    bool cambioProxima = existente.FechaProximaAplicacion.Date != proxima;
+                    existente.FechaProximaAplicacion = proxima;
+                    if (cambioProxima)
+                    {
+                        existente.NotificacionEnviada = false;
+                        existente.FechaNotificacion = null;
+                    }
+                    await _alarmaRepository.UpdateAsync(existente);
+                }
             }
             else
             {
@@ -127,11 +153,24 @@ namespace API.Services
 
         public async Task<bool> MarcarEsquemaCompletadoAsync(int pacienteId, int vacunaId)
         {
-            var pendiente = await _alarmaRepository.GetPendienteAsync(pacienteId, vacunaId);
-            if (pendiente == null) return false;
-            pendiente.EsquemaCompletado = true;
-            pendiente.NotificacionEnviada = true; // opcional: ya no notificar más
-            await _alarmaRepository.UpdateAsync(pendiente);
+            // Marcar todas las alarmas no completadas para ese paciente+vacuna como completadas y notificadas
+            var contextField = _alarmaRepository.GetType().GetField("_context", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
+            var dbContext = contextField?.GetValue(_alarmaRepository) as API.Persistence.Context.AplicationDbContext;
+            if (dbContext == null) return false;
+
+            var alarmas = await dbContext.AlarmasVacunacion
+                .Where(a => a.PacienteId == pacienteId && a.VacunaId == vacunaId && !a.EsquemaCompletado)
+                .ToListAsync();
+
+            if (alarmas.Count == 0) return false;
+
+            foreach (var a in alarmas)
+            {
+                a.EsquemaCompletado = true;
+                a.NotificacionEnviada = true;
+                a.FechaNotificacion = DateTime.Now;
+            }
+            await dbContext.SaveChangesAsync();
             return true;
         }
     }

@@ -85,7 +85,8 @@ namespace API.Persistence.Repositories
             return await _context.AlarmasVacunacion
                 .FirstOrDefaultAsync(a => a.PacienteId == pacienteId &&
                                           a.VacunaId == vacunaId &&
-                                          !a.EsquemaCompletado);
+                                          !a.EsquemaCompletado &&
+                                          !a.NotificacionEnviada);
         }
     }
 }

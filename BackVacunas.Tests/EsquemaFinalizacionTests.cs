@@ -253,5 +253,87 @@ public class EsquemaFinalizacionTests
         var totalDosis = ctx.EsquemasVacunacion.Count();
         Assert.Equal(3, totalDosis); // Solo deben existir 3 dosis registradas
     }
-   
+
+    //test para unica dosis
+    [Fact]
+    public async Task ConUnaDosis_FinalizaEnPrimera_NoCreaProximaNiAlarma()
+    {
+        var dbName = Guid.NewGuid().ToString();
+        using var ctx = BuildContext(dbName);
+        await SeedPacienteYVacunaAsync(ctx, 1);
+        var service = BuildService(ctx);
+
+        // Primera dosis (única)
+        await service.RegistrarEsquemaAsync(new EsquemaVacunacion
+        {
+            TipoCarnet = "ADULTO",
+            Responsable = "Enf",
+            RegistradoPAI = true,
+            PacienteId = 1,
+            VacunaId = 1,
+            Detalles = new System.Collections.Generic.List<EsquemaVacunacionDetalle>()
+        });
+
+        var esquemas = ctx.EsquemasVacunacion.OrderBy(e => e.Id).ToList();
+        Assert.Single(esquemas);
+        Assert.Equal(1, esquemas[0].NumeroDeDosis);
+        Assert.Null(esquemas[0].FechaProximaDosis);
+
+        // No debe existir alarma pendiente para esa vacuna/paciente
+        var alarmaPendiente = await ctx.AlarmasVacunacion
+            .FirstOrDefaultAsync(a => a.PacienteId == 1 && a.VacunaId == 1 && !a.EsquemaCompletado);
+        Assert.Null(alarmaPendiente);
+    }
+
+
+    //tes para alarma de dosis cuando no se marco como notificada se aplico la segunda dosis y se quito la alarma de la primera y se creo la segunda alarma
+    [Fact]
+    public async Task AlarmaNoNotificada_SeAplicaSegundaDosis_CierraPrimeraYCreaSegundaAlarma()
+    {
+        var dbName = Guid.NewGuid().ToString();
+        using var ctx = BuildContext(dbName);
+        await SeedPacienteYVacunaAsync(ctx, 3);
+        var service = BuildService(ctx);
+
+        // Aplicar primera dosis
+        await service.RegistrarEsquemaAsync(new EsquemaVacunacion
+        {
+            TipoCarnet = "INFANTIL",
+            Responsable = "Enf",
+            RegistradoPAI = true,
+            PacienteId = 1,
+            VacunaId = 1,
+            Detalles = new System.Collections.Generic.List<EsquemaVacunacionDetalle>()
+        });
+
+        // Verificar que se creó la alarma para la segunda dosis
+        var alarmaPrimera = await ctx.AlarmasVacunacion
+            .FirstOrDefaultAsync(a => a.PacienteId == 1 && a.VacunaId == 1 && !a.EsquemaCompletado);
+        Assert.NotNull(alarmaPrimera);
+        Assert.Equal(1, alarmaPrimera.DosisActual);
+        Assert.False(alarmaPrimera.NotificacionEnviada);
+
+        // Aplicar segunda dosis sin marcar la primera alarma como notificada
+        await service.RegistrarEsquemaAsync(new EsquemaVacunacion
+        {
+            TipoCarnet = "INFANTIL",
+            Responsable = "Enf",
+            RegistradoPAI = true,
+            PacienteId = 1,
+            VacunaId = 1,
+            Detalles = new System.Collections.Generic.List<EsquemaVacunacionDetalle>()
+        });
+
+        // Verificar que la primera alarma se cerró y se creó una nueva para la tercera dosis
+        var alarmaCerrada = await ctx.AlarmasVacunacion
+            .FirstOrDefaultAsync(a => a.Id == alarmaPrimera.Id);
+        Assert.NotNull(alarmaCerrada);
+        Assert.True(alarmaCerrada.EsquemaCompletado || alarmaCerrada.NotificacionEnviada);
+
+        var alarmaSegunda = await ctx.AlarmasVacunacion
+            .FirstOrDefaultAsync(a => a.PacienteId == 1 && a.VacunaId == 1 && !a.EsquemaCompletado && a.DosisActual == 2);
+        Assert.NotNull(alarmaSegunda);
+        Assert.Equal(2, alarmaSegunda.DosisActual);
+        Assert.False(alarmaSegunda.NotificacionEnviada);
+    }
 }
