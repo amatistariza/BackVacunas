@@ -4,4 +4,5 @@ namespace API.Domain.IRepositories;
 
 public interface IMadreRepository : IRepository<Madre>
 {
+	Task<Madre> GetByIdentificacionAsync(string tipoIdentificacion, string numeroIdentificacion);
 }

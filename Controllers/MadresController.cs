@@ -25,36 +25,78 @@ public class MadresController : ControllerBase
     [HttpGet("{id}")]
     public async Task<IActionResult> GetById(int id)
     {
-        var madre = await _madreService.GetByIdAsync(id);
-        if (madre == null)
-            return NotFound($"No se encontró la madre con ID {id}");
-        return Ok(madre);
+        try
+        {
+            var madre = await _madreService.GetByIdAsync(id);
+            if (madre == null)
+                return NotFound(new { mensaje = $"No se encontró la madre con ID {id}", status = 404 });
+            return Ok(madre);
+        }
+        catch (Exception ex)
+        {
+            return StatusCode(500, new { mensaje = $"Error interno del servidor: {ex.Message}" });
+        }
     }
 
     [HttpPost]
     public async Task<IActionResult> Create([FromBody] Madre madre)
     {
-        if (!ModelState.IsValid)
-            return BadRequest(ModelState);
+        try
+        {
+            if (!ModelState.IsValid)
+                return BadRequest(new { mensaje = "Datos inválidos.", status = 400 });
 
-        await _madreService.AddAsync(madre);
-        return CreatedAtAction(nameof(GetById), new { id = madre.Id }, madre);
+            madre.TipoIdentificacion = (madre.TipoIdentificacion ?? string.Empty).Trim().ToUpperInvariant();
+            madre.NumeroIdentificacion = (madre.NumeroIdentificacion ?? string.Empty).Trim();
+
+            var existente = await _madreService.GetByIdentificacionAsync(madre.TipoIdentificacion, madre.NumeroIdentificacion);
+            if (existente != null)
+                return BadRequest(new { mensaje = "Ya existe una madre registrada con ese tipo y número de identificación.", status = 400 });
+
+            await _madreService.AddAsync(madre);
+            return Ok(new { mensaje = "Madre registrada correctamente.", status = 200 });
+        }
+        catch (Exception ex)
+        {
+            return StatusCode(500, new { mensaje = $"Error interno del servidor: {ex.Message}", status = 500 });
+        }
     }
 
     [HttpPut("{id}")]
     public async Task<IActionResult> Update(int id, [FromBody] Madre madre)
     {
-        if (id != madre.Id)
-            return BadRequest("El ID proporcionado no coincide con el ID de la entidad.");
+        try
+        {
+            if (id != madre.Id)
+                return BadRequest(new { mensaje = "El ID proporcionado no coincide con el ID de la entidad.", status = 400 });
 
-        await _madreService.UpdateAsync(madre);
-        return NoContent();
+            madre.TipoIdentificacion = (madre.TipoIdentificacion ?? string.Empty).Trim().ToUpperInvariant();
+            madre.NumeroIdentificacion = (madre.NumeroIdentificacion ?? string.Empty).Trim();
+
+            var existente = await _madreService.GetByIdentificacionAsync(madre.TipoIdentificacion, madre.NumeroIdentificacion);
+            if (existente != null && existente.Id != id)
+                return BadRequest(new { mensaje = "Ya existe otra madre registrada con ese tipo y número de identificación.", status = 400 });
+
+            await _madreService.UpdateAsync(madre);
+            return Ok(new { mensaje = "Madre actualizada correctamente.", status = 200 });
+        }
+        catch (Exception ex)
+        {
+            return StatusCode(500, new { mensaje = $"Error interno del servidor: {ex.Message}", status = 500 });
+        }
     }
 
     [HttpDelete("{id}")]
     public async Task<IActionResult> Delete(int id)
     {
-        await _madreService.DeleteAsync(id);
-        return NoContent();
+        try
+        {
+            await _madreService.DeleteAsync(id);
+            return Ok(new { mensaje = "Madre eliminada correctamente.", status = 200 });
+        }
+        catch (Exception ex)
+        {
+            return StatusCode(500, new { mensaje = $"Error interno del servidor: {ex.Message}", status = 500 });
+        }
     }
 }

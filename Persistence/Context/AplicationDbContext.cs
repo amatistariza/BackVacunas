@@ -35,6 +35,10 @@ public class AplicationDbContext : DbContext
             .HasIndex(p => new { p.TipoIdentificacion, p.NumeroIdentificacion })
             .IsUnique();
 
+        // Nota: Si se requiere evitar duplicados de Madre a nivel BD,
+        // habilitar un índice único por (TipoIdentificacion, NumeroIdentificacion).
+        // Por ahora, se valida solo en la capa de API para no introducir migración.
+
         modelBuilder.Entity<Paciente>()
             .HasMany(p => p.Antecedentes)
             .WithOne(a => a.Paciente)
