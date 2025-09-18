@@ -33,31 +33,7 @@ namespace API.Services
         /// </summary>
         public async Task<IEnumerable<AlarmaVacunacion>> GetVacunacionesProximasMesActualAsync()
         {
-            // Reconciliar: asegurar que existan alarmas para esquemas con próxima dosis en el mes actual
-            var hoy = DateTime.Today;
-            var inicioMes = new DateTime(hoy.Year, hoy.Month, 1);
-            var inicioMesSiguiente = inicioMes.AddMonths(1);
-
-            // Acceder al DbContext para consultar Esquemas sin ampliar interfaz
-            var contextField = _esquemaRepository.GetType().GetField("_context", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
-            var dbContext = contextField?.GetValue(_esquemaRepository) as API.Persistence.Context.AplicationDbContext;
-            if (dbContext != null)
-            {
-                var esquemasMes = dbContext.EsquemasVacunacion
-                    .AsNoTracking()
-                    .Where(e => e.FechaProximaDosis.HasValue &&
-                                e.FechaProximaDosis.Value >= inicioMes &&
-                                e.FechaProximaDosis.Value < inicioMesSiguiente)
-                    .Select(e => new { e.PacienteId, e.VacunaId, e.NumeroDeDosis, e.FechaDosisAplicada, e.FechaProximaDosis })
-                    .ToList();
-
-                foreach (var e in esquemasMes)
-                {
-                    // upsert de alarma por cada esquema relevante
-                    await CrearAlarmaDesdeEsquemaAsync(e.PacienteId, e.VacunaId, e.NumeroDeDosis, e.FechaDosisAplicada, e.FechaProximaDosis);
-                }
-            }
-
+            // IMPORTANTE: este método debe ser de solo lectura; no crear/actualizar alarmas aquí
             return await _alarmaRepository.GetVacunacionesProximasMesActualAsync();
         }
 
