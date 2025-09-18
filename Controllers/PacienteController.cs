@@ -68,12 +68,38 @@ public class PacienteController : ControllerBase
     }
 
     [HttpPut("{id}")]
-    public async Task<IActionResult> Update(int id, [FromBody] Paciente paciente)
+    public async Task<IActionResult> Update(int id, [FromBody] PacienteUpdateDTO dto)
     {
-        if (id != paciente.Id)
-            return BadRequest(new { mensaje = "El ID proporcionado no coincide con el ID del paciente." });
+        if (dto == null)
+            return NoContent(); // no hay cambios
 
-        await _pacienteService.UpdateAsync(paciente);
+        // Cargar existente
+        var existente = await _pacienteService.GetByIdAsync(id);
+        if (existente == null)
+            return NotFound(new { mensaje = "Paciente no encontrado." });
+
+        // Aplicar cambios parciales solo si vienen en el payload
+        bool cambios = false;
+        if (!string.IsNullOrWhiteSpace(dto.Aseguradora) && dto.Aseguradora != existente.Aseguradora)
+        {
+            existente.Aseguradora = dto.Aseguradora;
+            cambios = true;
+        }
+        if (!string.IsNullOrWhiteSpace(dto.RegimenAfiliacion) && dto.RegimenAfiliacion != existente.RegimenAfiliacion)
+        {
+            existente.RegimenAfiliacion = dto.RegimenAfiliacion;
+            cambios = true;
+        }
+        if (!string.IsNullOrWhiteSpace(dto.PertenenciaEtnica) && dto.PertenenciaEtnica != existente.PertenenciaEtnica)
+        {
+            existente.PertenenciaEtnica = dto.PertenenciaEtnica;
+            cambios = true;
+        }
+
+        if (cambios)
+        {
+            await _pacienteService.UpdateAsync(existente);
+        }
         return NoContent();
     }
 
