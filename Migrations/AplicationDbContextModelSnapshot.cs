@@ -309,9 +309,11 @@ namespace API.Migrations
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Lote")
+                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Nombre")
+                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<int>("NumeroDosis")
@@ -648,6 +650,9 @@ namespace API.Migrations
                         .HasColumnType("bit");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("TipoIdentificacion", "NumeroIdentificacion")
+                        .IsUnique();
 
                     b.ToTable("Pacientes", (string)null);
                 });
