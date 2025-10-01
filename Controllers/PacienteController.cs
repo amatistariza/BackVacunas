@@ -68,7 +68,7 @@ public class PacienteController : ControllerBase
     }
 
     [HttpPut("{id}")]
-    public async Task<IActionResult> Update(int id, [FromBody] PacienteUpdateDTO dto)
+    public async Task<IActionResult> Update(int id, [FromBody] PacienteEditDTO dto)
     {
         if (dto == null)
             return NoContent(); // no hay cambios
@@ -80,27 +80,50 @@ public class PacienteController : ControllerBase
 
         // Aplicar cambios parciales solo si vienen en el payload
         bool cambios = false;
-        if (!string.IsNullOrWhiteSpace(dto.Aseguradora) && dto.Aseguradora != existente.Aseguradora)
-        {
-            existente.Aseguradora = dto.Aseguradora;
-            cambios = true;
-        }
-        if (!string.IsNullOrWhiteSpace(dto.RegimenAfiliacion) && dto.RegimenAfiliacion != existente.RegimenAfiliacion)
-        {
-            existente.RegimenAfiliacion = dto.RegimenAfiliacion;
-            cambios = true;
-        }
-        if (!string.IsNullOrWhiteSpace(dto.PertenenciaEtnica) && dto.PertenenciaEtnica != existente.PertenenciaEtnica)
-        {
-            existente.PertenenciaEtnica = dto.PertenenciaEtnica;
-            cambios = true;
-        }
+        void set<T>(T? val, Action<T> apply) where T : struct { if (val.HasValue) { apply(val.Value); cambios = true; } }
+    void setRef(string val, Action<string> apply) { if (!string.IsNullOrWhiteSpace(val)) { apply(val); cambios = true; } }
+
+        setRef(dto.TipoIdentificacion, v => existente.TipoIdentificacion = v.Trim().ToUpperInvariant());
+        setRef(dto.NumeroIdentificacion, v => existente.NumeroIdentificacion = v.Trim());
+        setRef(dto.PrimerNombre, v => existente.PrimerNombre = v);
+        setRef(dto.SegundoNombre, v => existente.SegundoNombre = v);
+        setRef(dto.PrimerApellido, v => existente.PrimerApellido = v);
+        setRef(dto.SegundoApellido, v => existente.SegundoApellido = v);
+        set(dto.FechaAtencion, v => existente.FechaAtencion = v.Date);
+        set(dto.FechaNacimiento, v => existente.FechaNacimiento = v.Date);
+        setRef(dto.Sexo, v => existente.Sexo = v);
+        setRef(dto.OrientacionSexual, v => existente.OrientacionSexual = v);
+        set(dto.EdadGestacionalSemanas, v => existente.EdadGestacionalSemanas = v);
+        setRef(dto.PaisNacimiento, v => existente.PaisNacimiento = v);
+        setRef(dto.EstatusMigratorio, v => existente.EstatusMigratorio = v);
+        setRef(dto.RegimenAfiliacion, v => existente.RegimenAfiliacion = v);
+        setRef(dto.Aseguradora, v => existente.Aseguradora = v);
+        setRef(dto.PertenenciaEtnica, v => existente.PertenenciaEtnica = v);
+        set(dto.Desplazado, v => existente.Desplazado = v);
+        set(dto.Discapacitado, v => existente.Discapacitado = v);
+        set(dto.Fallecido, v => existente.Fallecido = v);
+        set(dto.VictimaConflictoArmado, v => existente.VictimaConflictoArmado = v);
+        set(dto.EstudiaActualmente, v => existente.EstudiaActualmente = v);
+        setRef(dto.PaisResidencia, v => existente.PaisResidencia = v);
+        setRef(dto.DepartamentoResidencia, v => existente.DepartamentoResidencia = v);
+        setRef(dto.MunicipioResidencia, v => existente.MunicipioResidencia = v);
+        setRef(dto.ComunaLocalidad, v => existente.ComunaLocalidad = v);
+        setRef(dto.Area, v => existente.Area = v);
+        setRef(dto.Direccion, v => existente.Direccion = v);
+        setRef(dto.TelefonoFijo, v => existente.TelefonoFijo = v);
+        setRef(dto.Celular, v => existente.Celular = v);
+        setRef(dto.Email, v => existente.Email = v);
+        set(dto.AutorizaLlamadasTelefonicas, v => existente.AutorizaLlamadasTelefonicas = v);
+        set(dto.AutorizaEnvioCorreo, v => existente.AutorizaEnvioCorreo = v);
+        set(dto.MadreId, v => existente.MadreId = v);
+        set(dto.CuidadorId, v => existente.CuidadorId = v);
 
         if (cambios)
         {
             await _pacienteService.UpdateAsync(existente);
+            return Ok(new { mensaje = "Paciente actualizado correctamente.", status = 200 });
         }
-        return NoContent();
+        return Ok(new { mensaje = "Sin cambios efectivos.", status = 200 });
     }
 
     [HttpDelete("{id}")]
