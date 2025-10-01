@@ -240,6 +240,7 @@ public class EsquemaVacunacionService : IEsquemaVacunacionService
 
                 resultados.Add(new API.DTO.EsquemaVacunacionListadoDto
                 {
+                    EsquemaId = e.Id,
                     TipoCarnet = e.TipoCarnet,
                     RegistradoPAI = e.RegistradoPAI,
                     TipoIdentificacion = paciente?.TipoIdentificacion ?? string.Empty,
@@ -269,6 +270,7 @@ public class EsquemaVacunacionService : IEsquemaVacunacionService
         var lista = await query
             .Select(e => new API.DTO.EsquemaVacunacionListadoDto
             {
+                EsquemaId = e.Id,
                 TipoCarnet = e.TipoCarnet,
                 RegistradoPAI = e.RegistradoPAI,
                 TipoIdentificacion = e.Paciente.TipoIdentificacion,

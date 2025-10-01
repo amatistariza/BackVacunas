@@ -33,4 +33,13 @@ public class StatisticsController : ControllerBase
         var data = await _statisticsService.GetDosesPerVaccineAsync(desde, hasta);
         return Ok(data);
     }
+
+    // GET: api/estadisticas/vacunas-aplicadas?desde=2025-09-01&hasta=2025-09-30
+    [HttpGet("vacunas-aplicadas")]
+    [ProducesResponseType(typeof(IReadOnlyList<VacunaAplicadaDetalleDto>), 200)]
+    public async Task<ActionResult<IReadOnlyList<VacunaAplicadaDetalleDto>>> GetVacunasAplicadas([FromQuery] DateTime? desde = null, [FromQuery] DateTime? hasta = null)
+    {
+        var data = await _statisticsService.GetVacunasAplicadasAsync(desde, hasta);
+        return Ok(data);
+    }
 }

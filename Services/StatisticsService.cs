@@ -107,4 +107,43 @@ public class StatisticsService : IStatisticsService
         _cache.Set(cacheKey, list, TimeSpan.FromSeconds(cacheSeconds));
         return list;
     }
+
+    public async Task<IReadOnlyList<VacunaAplicadaDetalleDto>> GetVacunasAplicadasAsync(DateTime? desde = null, DateTime? hasta = null, int cacheSeconds = 60)
+    {
+        // Rango [start, end)
+        var start = (desde ?? DateTime.MinValue).Date;
+        var end = ((hasta ?? DateTime.Today).Date).AddDays(1);
+
+        var cacheKey = $"vaccines-applied:{start:yyyyMMdd}:{end:yyyyMMdd}";
+        if (_cache.TryGetValue(cacheKey, out var cachedObj) && cachedObj is IReadOnlyList<VacunaAplicadaDetalleDto> cached)
+        {
+            return cached;
+        }
+
+        // Traer esquemas con Paciente y Vacuna para construir DTO
+        var query = _db.EsquemasVacunacion
+            .AsNoTracking()
+            .Include(e => e.Paciente)
+            .Include(e => e.Vacuna)
+            .Where(e => e.FechaDosisAplicada >= start && e.FechaDosisAplicada < end)
+            .Select(e => new VacunaAplicadaDetalleDto
+            {
+                Vacuna = e.Vacuna.Nombre,
+                NumeroDosis = e.NumeroDeDosis,
+                TipoIdentificacion = e.Paciente.TipoIdentificacion,
+                NumeroIdentificacion = e.Paciente.NumeroIdentificacion,
+                Nombre = e.Paciente.PrimerNombre,
+                Apellido = e.Paciente.PrimerApellido,
+                // Edad calculada al día de la aplicación
+                Edad = EF.Functions.DateDiffYear(e.Paciente.FechaNacimiento, e.FechaDosisAplicada),
+                FechaAplicacion = e.FechaDosisAplicada
+            })
+            .OrderByDescending(x => x.FechaAplicacion)
+            .ThenBy(x => x.Vacuna)
+            .ThenBy(x => x.NumeroDosis);
+
+        var result = await query.ToListAsync();
+        _cache.Set(cacheKey, result, TimeSpan.FromSeconds(cacheSeconds));
+        return result;
+    }
 }

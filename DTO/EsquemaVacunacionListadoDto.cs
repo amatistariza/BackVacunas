@@ -5,6 +5,7 @@ namespace API.DTO;
 
 public class EsquemaVacunacionListadoDto
 {
+    [JsonProperty("esquemaId", Order = 0)] public int EsquemaId { get; set; }
     [JsonProperty("tipoIdentificacion", Order = 1)] public string TipoIdentificacion { get; set; }
 
     [JsonProperty("numeroIdentificacion", Order = 2)] public string NumeroIdentificacion { get; set; }
