@@ -9,4 +9,7 @@ public class DosisPorVacunaDto
 
     [JsonProperty("dosis")]
     public int Dosis { get; set; }
+
+    [JsonProperty("fechaAplicacion")]
+    public DateTime FechaAplicacion { get; set; }
 }

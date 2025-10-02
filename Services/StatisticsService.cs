@@ -98,7 +98,8 @@ public class StatisticsService : IStatisticsService
             .Select(g => new DosisPorVacunaDto
             {
                 Vacuna = g.Key,
-                Dosis = g.Count()
+                Dosis = g.Count(),
+                FechaAplicacion = g.Max(e => e.FechaDosisAplicada)
             })
             .OrderByDescending(x => x.Dosis)
             .ThenBy(x => x.Vacuna);
@@ -136,7 +137,15 @@ public class StatisticsService : IStatisticsService
                 Apellido = e.Paciente.PrimerApellido,
                 // Edad calculada al día de la aplicación
                 Edad = EF.Functions.DateDiffYear(e.Paciente.FechaNacimiento, e.FechaDosisAplicada),
-                FechaAplicacion = e.FechaDosisAplicada
+                FechaAplicacion = e.FechaDosisAplicada,
+                // Campos adicionales del paciente
+                RegimenAfiliacion = e.Paciente.RegimenAfiliacion,
+                PertenenciaEtnica = e.Paciente.PertenenciaEtnica,
+                Sexo = e.Paciente.Sexo,
+                Desplazado = e.Paciente.Desplazado,
+                Discapacitado = e.Paciente.Discapacitado,
+                VictimaConflicto = e.Paciente.VictimaConflictoArmado,
+                EstudiaActualmente = e.Paciente.EstudiaActualmente
             })
             .OrderByDescending(x => x.FechaAplicacion)
             .ThenBy(x => x.Vacuna)
