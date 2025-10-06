@@ -1,0 +1,58 @@
+version: '3.8'
+services:
+  frontend:
+    image: amatistaariza/jama-frontend:latest
+    container_name: jama-frontend_local
+    ports:
+      - "4200:80"
+    depends_on:
+      - backend
+    restart: unless-stopped
+    networks:
+      - jama
+
+  backend:
+    image: amatistaariza/jama-backend:latest
+    container_name: jama-backend_local
+    ports:
+      - "5000:5000"
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Production
+      - ASPNETCORE_URLS=http://+:5000
+      - ConnectionStrings__Conexion=Server=sqlserver,1433;Database=VacunasBD;User Id=sa;Password=${SA_PASSWORD};TrustServerCertificate=True;
+      - SKIP_DB_SEED=false
+    depends_on:
+      sqlserver:
+        condition: service_healthy
+    restart: unless-stopped
+    networks:
+      - jama
+    env_file:
+      - .env
+  
+  sqlserver:
+    image: mcr.microsoft.com/mssql/server:2019-latest
+    container_name: sqlserver
+    ports:
+      - "1433:1433"
+    environment:
+      - ACCEPT_EULA=Y
+      - SA_PASSWORD=${SA_PASSWORD}
+    networks:
+      - jama
+    healthcheck:
+      test: ["CMD-SHELL", "bash -c 'for i in {1..60}; do (echo > /dev/tcp/127.0.0.1/1433) && exit 0 || sleep 1; done; exit 1'"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+      start_period: 20s
+    volumes:
+      - sqlserver-data:/var/opt/mssql
+  
+networks:
+  jama:
+    driver: bridge
+
+volumes:
+  sqlserver-data:
+    driver: local
