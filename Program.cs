@@ -11,6 +11,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using System.Text;
+using Microsoft.Extensions.Logging;
 
 var das = 1;
 var builder = WebApplication.CreateBuilder(args);
@@ -167,11 +168,53 @@ if (das == 1)
 
     app.MapControllers();
 
-    // Seeding de base de datos (solo primera vez / ambiente dev)
+    // Seeding y migraciones de base de datos
+    var skipSeedEnv = Environment.GetEnvironmentVariable("SKIP_DB_SEED");
+    var skipSeed = !string.IsNullOrEmpty(skipSeedEnv) && skipSeedEnv.Equals("true", StringComparison.OrdinalIgnoreCase);
+
+    // Always attempt to apply migrations on startup (with retries). Seeding is optional and controlled by SKIP_DB_SEED.
     using (var scope = app.Services.CreateScope())
     {
         var ctx = scope.ServiceProvider.GetRequiredService<AplicationDbContext>();
-        await API.Services.DatabaseSeeder.SeedAsync(ctx);
+        var logger = scope.ServiceProvider.GetRequiredService<ILogger<Program>>();
+
+        // Intentar aplicar migraciones con reintentos para esperar a que SQL Server esté listo
+        var maxAttempts = 30;
+        var delay = TimeSpan.FromSeconds(2);
+        for (int attempt = 1; attempt <= maxAttempts; attempt++)
+        {
+            try
+            {
+                logger.LogInformation("Attempt {Attempt} to apply migrations", attempt);
+                ctx.Database.Migrate();
+                logger.LogInformation("Database migrated successfully");
+                break;
+            }
+            catch (Exception ex)
+            {
+                logger.LogWarning(ex, "Database not ready yet (attempt {Attempt}/{MaxAttempts})", attempt, maxAttempts);
+                if (attempt == maxAttempts)
+                {
+                    logger.LogError(ex, "Could not apply migrations after {MaxAttempts} attempts", maxAttempts);
+                    throw;
+                }
+                await Task.Delay(delay);
+            }
+        }
+
+        if (!skipSeed)
+        {
+            try
+            {
+                await API.Services.DatabaseSeeder.SeedAsync(ctx);
+                logger.LogInformation("Database seeded successfully");
+            }
+            catch (Exception ex)
+            {
+                logger.LogError(ex, "Seeding failed");
+                throw;
+            }
+        }
     }
 
     app.Run();

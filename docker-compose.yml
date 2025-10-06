@@ -1,0 +1,29 @@
+version: '3.8'
+services:
+  sqlserver:
+    image: mcr.microsoft.com/mssql/server:2022-latest
+    container_name: backvacunas_sqlserver
+    environment:
+      - ACCEPT_EULA=Y
+      - SA_PASSWORD=Amatista123!
+    ports:
+      - "1433:1433"
+    volumes:
+      - sqlserverdata:/var/opt/mssql
+
+
+  api:
+    build: .
+    image: amatistaariza/jama-backend:latest
+    container_name: backvacunas_api
+    depends_on:
+      - sqlserver
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ConnectionStrings__Conexion=Server=sqlserver,1433;Database=VacunasBD;User Id=sa;Password=Amatista123!;TrustServerCertificate=True;
+      - SKIP_DB_SEED=false
+    ports:
+      - "5000:5000"
+
+volumes:
+  sqlserverdata:
