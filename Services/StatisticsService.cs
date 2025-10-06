@@ -132,18 +132,29 @@ public class StatisticsService : IStatisticsService
             .ThenBy(e => e.NumeroDeDosis)
             .ToListAsync();
 
-        // Procesar en memoria para calcular edad en años o meses
+        // Procesar en memoria para calcular edad en días, meses o años
         var result = esquemas.Select(e =>
         {
             var edadEnAnios = CalcularEdadEnAnios(e.Paciente.FechaNacimiento, e.FechaDosisAplicada);
             var edad = edadEnAnios;
             var unidadEdad = "años";
 
-            // Si es menor a 1 año, calcular en meses
+            // Si es menor a 1 año, calcular en meses o días
             if (edadEnAnios < 1)
             {
-                edad = CalcularEdadEnMeses(e.Paciente.FechaNacimiento, e.FechaDosisAplicada);
-                unidadEdad = "meses";
+                var edadEnMeses = CalcularEdadEnMeses(e.Paciente.FechaNacimiento, e.FechaDosisAplicada);
+                
+                // Si es menor a 1 mes, calcular en días
+                if (edadEnMeses < 1)
+                {
+                    edad = CalcularEdadEnDias(e.Paciente.FechaNacimiento, e.FechaDosisAplicada);
+                    unidadEdad = "días";
+                }
+                else
+                {
+                    edad = edadEnMeses;
+                    unidadEdad = "meses";
+                }
             }
 
             return new VacunaAplicadaDetalleDto
@@ -194,5 +205,11 @@ public class StatisticsService : IStatisticsService
         }
         
         return Math.Max(0, meses); // Nunca negativo
+    }
+
+    private static int CalcularEdadEnDias(DateTime fechaNacimiento, DateTime fechaReferencia)
+    {
+        var dias = (fechaReferencia.Date - fechaNacimiento.Date).Days;
+        return Math.Max(0, dias); // Nunca negativo
     }
 }
