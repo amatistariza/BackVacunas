@@ -122,12 +122,31 @@ public class StatisticsService : IStatisticsService
         }
 
         // Traer esquemas con Paciente y Vacuna para construir DTO
-        var query = _db.EsquemasVacunacion
+        var esquemas = await _db.EsquemasVacunacion
             .AsNoTracking()
             .Include(e => e.Paciente)
             .Include(e => e.Vacuna)
             .Where(e => e.FechaDosisAplicada >= start && e.FechaDosisAplicada < end)
-            .Select(e => new VacunaAplicadaDetalleDto
+            .OrderByDescending(e => e.FechaDosisAplicada)
+            .ThenBy(e => e.Vacuna.Nombre)
+            .ThenBy(e => e.NumeroDeDosis)
+            .ToListAsync();
+
+        // Procesar en memoria para calcular edad en años o meses
+        var result = esquemas.Select(e =>
+        {
+            var edadEnAnios = CalcularEdadEnAnios(e.Paciente.FechaNacimiento, e.FechaDosisAplicada);
+            var edad = edadEnAnios;
+            var unidadEdad = "años";
+
+            // Si es menor a 1 año, calcular en meses
+            if (edadEnAnios < 1)
+            {
+                edad = CalcularEdadEnMeses(e.Paciente.FechaNacimiento, e.FechaDosisAplicada);
+                unidadEdad = "meses";
+            }
+
+            return new VacunaAplicadaDetalleDto
             {
                 Vacuna = e.Vacuna.Nombre,
                 NumeroDosis = e.NumeroDeDosis,
@@ -135,8 +154,8 @@ public class StatisticsService : IStatisticsService
                 NumeroIdentificacion = e.Paciente.NumeroIdentificacion,
                 Nombre = e.Paciente.PrimerNombre,
                 Apellido = e.Paciente.PrimerApellido,
-                // Edad calculada al día de la aplicación
-                Edad = EF.Functions.DateDiffYear(e.Paciente.FechaNacimiento, e.FechaDosisAplicada),
+                Edad = edad,
+                UnidadEdad = unidadEdad,
                 FechaAplicacion = e.FechaDosisAplicada,
                 // Campos adicionales del paciente
                 RegimenAfiliacion = e.Paciente.RegimenAfiliacion,
@@ -146,13 +165,34 @@ public class StatisticsService : IStatisticsService
                 Discapacitado = e.Paciente.Discapacitado,
                 VictimaConflicto = e.Paciente.VictimaConflictoArmado,
                 EstudiaActualmente = e.Paciente.EstudiaActualmente
-            })
-            .OrderByDescending(x => x.FechaAplicacion)
-            .ThenBy(x => x.Vacuna)
-            .ThenBy(x => x.NumeroDosis);
-
-        var result = await query.ToListAsync();
+            };
+        }).ToList();
         _cache.Set(cacheKey, result, TimeSpan.FromSeconds(cacheSeconds));
         return result;
+    }
+
+    // Métodos auxiliares para calcular edad
+    private static int CalcularEdadEnAnios(DateTime fechaNacimiento, DateTime fechaReferencia)
+    {
+        var edad = fechaReferencia.Year - fechaNacimiento.Year;
+        if (fechaReferencia < fechaNacimiento.AddYears(edad))
+        {
+            edad--;
+        }
+        return edad;
+    }
+
+    private static int CalcularEdadEnMeses(DateTime fechaNacimiento, DateTime fechaReferencia)
+    {
+        var meses = (fechaReferencia.Year - fechaNacimiento.Year) * 12;
+        meses += fechaReferencia.Month - fechaNacimiento.Month;
+        
+        // Ajustar si el día de referencia es menor al día de nacimiento
+        if (fechaReferencia.Day < fechaNacimiento.Day)
+        {
+            meses--;
+        }
+        
+        return Math.Max(0, meses); // Nunca negativo
     }
 }

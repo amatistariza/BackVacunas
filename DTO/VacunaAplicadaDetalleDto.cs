@@ -9,6 +9,7 @@ public class VacunaAplicadaDetalleDto
     public string Nombre { get; set; }
     public string Apellido { get; set; }
     public int Edad { get; set; }
+    public string UnidadEdad { get; set; } // "años" o "meses"
     public DateTime FechaAplicacion { get; set; }
     
     // Campos adicionales del paciente
